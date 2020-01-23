@@ -1,10 +1,25 @@
 from typing import List, Optional
 
 from supbotserver import model
-from supbotserver.shared_states import interface
+from abc import ABC, abstractmethod
 
 
-class ActionBuffer(interface.IActionBuffer):
+class IActionBuffer(ABC):
+
+    @abstractmethod
+    def get_action(self) -> model.Action:
+        pass
+
+    @abstractmethod
+    def add_action(self, action: model.Action):
+        pass
+
+    @abstractmethod
+    def size(self):
+        pass
+
+
+class ActionBuffer(IActionBuffer):
 
     def __init__(self):
         self.buffer: List[model.Action] = []

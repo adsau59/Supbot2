@@ -1,5 +1,11 @@
+from enum import Enum
 from typing import Tuple, Dict, Callable
 from typing import NamedTuple
+
+
+class State(Enum):
+    MAIN = 0,
+    CHAT = 1
 
 
 class Chat(NamedTuple):
@@ -7,11 +13,7 @@ class Chat(NamedTuple):
 
 
 class GUIState(NamedTuple):
-    name: str
-
-
-class GUIStateWithInfo(NamedTuple):
-    state: GUIState
+    state: State
     info: str = ""
 
 
@@ -21,8 +23,8 @@ class Action(NamedTuple):
 
 
 class ActionMeta(NamedTuple):
-    from supbotserver.shared_states import interface
-    run: Callable[[interface.IDriver, GUIStateWithInfo, Tuple], GUIStateWithInfo]
+    from supbotserver.shared_states.app_driver import IDriver
+    run: Callable[[IDriver, GUIState, Tuple], GUIState]  # (driver, state, data) -> state
     data_type: type
 
 

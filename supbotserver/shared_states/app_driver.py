@@ -1,12 +1,39 @@
 from typing import Tuple, Optional
+from abc import ABC, abstractmethod
 
 from appium.webdriver import Remote
 import time
 from supbotserver import model
-from supbotserver.shared_states import interface
 
 
-class AppDriver(interface.IDriver):
+class IDriver(ABC):
+
+    @abstractmethod
+    def destroy(self):
+        pass
+
+    @abstractmethod
+    def click_on_chat(self, chat_name: str):
+        pass
+
+    @abstractmethod
+    def type_and_send(self, message: str):
+        pass
+
+    @abstractmethod
+    def press_back(self):
+        pass
+
+    @abstractmethod
+    def get_new_chat(self) -> Optional[model.Chat]:
+        pass
+
+    @abstractmethod
+    def get_new_messages(self) -> Optional[Tuple[str]]:
+        pass
+
+
+class AppDriver(IDriver):
 
     def __init__(self):
         desired_caps = {
