@@ -3,6 +3,9 @@ from abc import ABC, abstractmethod
 
 from appium.webdriver import Remote
 import time
+
+from selenium.common.exceptions import NoSuchElementException
+
 from supbotserver import model
 
 
@@ -48,16 +51,24 @@ class AppDriver(IDriver):
     def destroy(self):
         self.driver.quit()
 
-    def click_on_chat(self, chat_name: str):
-        element = self.driver.find_element_by_xpath('//android.widget.TextView[contains(@text,"{}")]'.format(chat_name))
-        element.click()
+    def click_on_chat(self, chat_name: str) -> bool:
+        try:
+            element = self.driver.find_element_by_xpath(
+                '//android.widget.TextView[contains(@text,"{}")]'.format(chat_name))
+            element.click()
+            return True
+        except NoSuchElementException:
+            return False
 
     def type_and_send(self, message: str):
-        element = self.driver.find_element_by_id('com.whatsapp:id/entry')
-        element.send_keys(message)
+        try:
+            element = self.driver.find_element_by_id('com.whatsapp:id/entry')
+            element.send_keys(message)
 
-        element = self.driver.find_element_by_id('com.whatsapp:id/send')
-        element.click()
+            element = self.driver.find_element_by_id('com.whatsapp:id/send')
+            element.click()
+        except NoSuchElementException:
+            return False
 
     def press_back(self):
         self.driver.press_keycode(4)
@@ -70,7 +81,7 @@ class AppDriver(IDriver):
                                                         '//android.widget.TextView[@resource-id="com.whatsapp:id'
                                                         '/conversations_row_contact_name"]')
             return model.Chat(element.text)
-        except:
+        except NoSuchElementException:
             return None
 
     def get_new_messages(self) -> Optional[Tuple[str]]:
@@ -82,5 +93,5 @@ class AppDriver(IDriver):
                                                                   '"com.whatsapp:id/message_text"]')
             messages: Tuple[str] = tuple(x.text for x in message_elements)
             return messages
-        except:
+        except NoSuchElementException:
             return None

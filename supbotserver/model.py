@@ -1,6 +1,8 @@
 from enum import Enum
-from typing import Tuple, Dict, Callable
+from typing import Tuple, Callable, Any, Dict
 from typing import NamedTuple
+
+from supbotserver.sharedstates.system import ISystem
 
 
 class State(Enum):
@@ -23,9 +25,13 @@ class Action(NamedTuple):
 
 
 class ActionMeta(NamedTuple):
-    from supbotserver.shared_states.app_driver import IDriver
-    run: Callable[[IDriver, GUIState, Tuple], GUIState]  # (driver, state, data) -> state
+    from supbotserver.sharedstates.app_driver import IDriver
+    name: str
     data_type: type
+    run: Callable[[IDriver, GUIState, ISystem, Tuple], GUIState]  # (driver, state, data) -> state
+    json_to_action: Callable[[Any], Action]
 
 
-States = Dict[str, GUIState]
+# globals
+
+actions: Dict[str, ActionMeta] = {}
