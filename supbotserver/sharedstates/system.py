@@ -5,13 +5,17 @@ import loguru
 
 
 class ISystem(ABC):
+    """
+    System should only contain third party libraries
+    which is going to used by every systems
+    """
 
     @abstractmethod
-    def get_status(self) -> bool:
+    def is_on(self) -> bool:
         pass
 
     @abstractmethod
-    def set_status(self, status: bool):
+    def quit(self):
         pass
 
     @abstractmethod
@@ -25,18 +29,18 @@ class ISystem(ABC):
 
 class System(ISystem):
 
-    def __init__(self):
+    def __init__(self, logger: loguru.Logger):
         self.status = True
-        self.logger = loguru.logger
+        self.logger = logger
 
-    def get_status(self) -> bool:
+    def is_on(self) -> bool:
         return self.status
-
-    def set_status(self, status: bool):
-        self.status = status
 
     def wait(self):
         input("enter to quit")
 
     def get_logger(self) -> loguru.Logger:
         return self.logger
+
+    def quit(self):
+        self.status = False

@@ -1,9 +1,8 @@
 from typeguard import check_type
-from supbotserver import model
+from supbotserver import model, server
 from supbotserver.model import State, actions
 from supbotserver.sharedstates.action_buffer import IActionBuffer
 from supbotserver.sharedstates.app_driver import IDriver
-from supbotserver.sharedstates.event import IEventHandler
 from supbotserver.sharedstates.system import ISystem
 from supbotserver.controller.actions import send_message
 
@@ -14,28 +13,28 @@ def initialize():
 
 # checker actions
 def check_for_new_chat(driver: IDriver, current: model.GUIState,
-                       event: IEventHandler, system: ISystem) -> model.GUIState:
+                       system: ISystem) -> model.GUIState:
     current = change_state(driver, current, model.GUIState(State.MAIN), system)
     chat = driver.get_new_chat()
     if chat is not None:
-        current = check_for_new_messages(driver, current, chat, event, system)
+        current = check_for_new_messages(driver, current, chat, system)
     return current
 
 
 def check_for_new_messages(driver: IDriver, current: model.GUIState, chat: model.Chat,
-                           event: IEventHandler, system: ISystem) -> model.GUIState:
+                           system: ISystem) -> model.GUIState:
     current = change_state(driver, current, model.GUIState(State.CHAT, chat.name), system)
     messages = driver.get_new_messages()
 
-    event.new_messages(chat, messages)
+    server.send_event("new_message", {"chat_name": chat.name, "message": list(messages)})
 
     return current
 
 
 # action helper
-def execute_action(driver: IDriver, current: model.GUIState,
-                   action_buffer: IActionBuffer, system: ISystem) -> model.GUIState:
-    action: model.Action = action_buffer.get_action()
+def execute_action(driver: IDriver, buffer: IActionBuffer, current: model.GUIState,
+                   system: ISystem) -> model.GUIState:
+    action: model.Action = buffer.get_action()
 
     if action is None:
         return current

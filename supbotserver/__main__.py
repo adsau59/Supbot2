@@ -1,23 +1,21 @@
+from supbotserver import server
 from supbotserver.controller import looper
-from supbotserver.sharedstates import action_buffer, event, system
+from supbotserver.sharedstates import action_buffer, system
 import threading
-
-from supbotserver.webserver import WebServer
+import loguru
 
 
 def run():
     _action_buffer = action_buffer.ActionBuffer()
-    _event = event.EventHandler()
-    _system = system.System()
+    _system = system.System(loguru.logger)
 
-    looper_thread = threading.Thread(target=looper.start_looper, args=(_action_buffer, _event, _system,))
+    looper_thread = threading.Thread(target=looper.start, args=(_action_buffer, _system,))
     looper_thread.start()
 
-    _webserver = WebServer(_action_buffer)
+    server_thread = threading.Thread(target=server.start, args=(_action_buffer, _system,))
+    server_thread.start()
 
-    _webserver.start()
-    _system.set_status(False)
-
+    server_thread.join()
     looper_thread.join()
 
 

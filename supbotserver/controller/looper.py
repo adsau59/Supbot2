@@ -3,12 +3,10 @@ from supbotserver import model
 from supbotserver.model import State
 from supbotserver.sharedstates.action_buffer import IActionBuffer
 from supbotserver.sharedstates.app_driver import AppDriver
-from supbotserver.sharedstates.event import IEventHandler
 from supbotserver.sharedstates.system import ISystem
 
 
-def start_looper(action_buffer: IActionBuffer, event: IEventHandler,
-                 system: ISystem):
+def start(buffer: IActionBuffer, system: ISystem):
     action_helper.initialize()
 
     d = AppDriver()
@@ -16,9 +14,9 @@ def start_looper(action_buffer: IActionBuffer, event: IEventHandler,
 
     system.get_logger().info("Started")
 
-    while system.get_status():
+    while system.is_on():
 
-        if action_buffer.size() == 0:
-            gui_state = action_helper.check_for_new_chat(d, gui_state, event, system)
+        if buffer.size() == 0:
+            gui_state = action_helper.check_for_new_chat(d, gui_state, system)
         else:
-            gui_state = action_helper.execute_action(d, gui_state, action_buffer, system)
+            gui_state = action_helper.execute_action(d, buffer, gui_state, system)
