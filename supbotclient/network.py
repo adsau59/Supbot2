@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import json
 import socket
-
-from tests.temp_client.main import System
+import typing
+if typing.TYPE_CHECKING:
+    from supbotclient import EventHandler
 
 
 def send_request(_request: dict):
@@ -16,18 +19,19 @@ def send_request(_request: dict):
     return data
 
 
-def receive_event(system: System):
+def receive_event(event: EventHandler):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("0.0.0.0", 3248))
     s.settimeout(10)
     s.listen(1)
 
-    while system.is_on:
+    while event.is_on:
         try:
             conn, addr = s.accept()
-            data = conn.recv(1024).decode('utf-8')
-            event = json.loads(data)
-            print(event)
+            data = json.loads(conn.recv(1024).decode('utf-8'))
+
+            if data["function"] == "event":
+                event.call_event(data["data"]["name"], data["data"]["params"])
 
             conn.send(json.dumps({"success": True}).encode('utf-8'))
         except socket.timeout:

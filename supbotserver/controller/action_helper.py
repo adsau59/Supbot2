@@ -26,7 +26,7 @@ def check_for_new_messages(driver: IDriver, current: model.GUIState, chat: model
     current = change_state(driver, current, model.GUIState(State.CHAT, chat.name), system)
     messages = driver.get_new_messages()
 
-    server.send_event("new_message", {"chat_name": chat.name, "message": list(messages)})
+    server.send_event("new_message", {"chat_name": chat.name, "messages": list(messages)})
 
     return current
 
