@@ -6,7 +6,7 @@ import time
 
 from selenium.common.exceptions import NoSuchElementException
 
-from supbotserver import model
+from supbot import model
 
 
 class IDriver(ABC):
@@ -28,7 +28,7 @@ class IDriver(ABC):
         pass
 
     @abstractmethod
-    def get_new_chat(self) -> Optional[model.Chat]:
+    def get_new_chat(self) -> Optional['model.Chat']:
         pass
 
     @abstractmethod
@@ -74,7 +74,7 @@ class AppDriver(IDriver):
         self.driver.press_keycode(4)
         time.sleep(1)
 
-    def get_new_chat(self) -> Optional[model.Chat]:
+    def get_new_chat(self) -> Optional['model.Chat']:
         try:
             element = self.driver.find_element_by_xpath('//android.widget.TextView[@resource-id='
                                                         '"com.whatsapp:id/conversations_row_message_count"]/../..'

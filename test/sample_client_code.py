@@ -1,9 +1,9 @@
-import supbotclient as supbot
+import supbot
 
 
-def repeat_message(chat_name, messages):
+def repeat_message(contact_name, messages):
     for m in messages:
-        supbot.send_message(chat_name, m)
+        supbot.send_message(contact_name, m)
 
 
 with supbot.EventHandler(message_received=repeat_message) as e:
