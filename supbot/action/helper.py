@@ -10,6 +10,7 @@ from supbot.system import ISystem
 if typing.TYPE_CHECKING:
     from supbot.api import IEventHandler
 
+
 # checker actions
 def check_for_new_chat(system: ISystem, driver: IDriver,
                        event: 'IEventHandler', current: GUIState) -> GUIState:
@@ -25,7 +26,8 @@ def check_for_new_messages(system: ISystem, driver: IDriver,
     current = change_state(driver, current, GUIState(State.CHAT, chat.name), system)
     messages = driver.get_new_messages()
 
-    event.call_event(Event.MESSAGE_RECEIVED, (chat.name, list(messages)))
+    for m in messages:
+        event.call_event(Event.MESSAGE_RECEIVED, (chat.name, m))
 
     return current
 
