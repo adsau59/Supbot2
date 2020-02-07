@@ -1,9 +1,12 @@
+import typing
 from enum import Enum
 from typing import Tuple, Callable, List
 from typing import NamedTuple
 
-from supbot.system import ISystem
-from supbot.app_driver import IDriver
+from supbot.app_driver import AppDriver
+
+if typing.TYPE_CHECKING:
+    from supbot.api import System
 
 
 class State(Enum):
@@ -35,7 +38,7 @@ class Action(NamedTuple):
 
 class ActionMeta(NamedTuple):
     data_type: type
-    run: Callable[[IDriver, GUIState, ISystem, Tuple], GUIState]  # (driver, state, data) -> state
+    run: Callable[[AppDriver, GUIState, 'System', Tuple], GUIState]  # (driver, state, data) -> state
 
 
 ActionBuffer = List[Action]

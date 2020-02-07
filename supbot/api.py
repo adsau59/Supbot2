@@ -1,49 +1,39 @@
-import threading
-from abc import ABC, abstractmethod
-from typing import List, Callable, Tuple
 
-import loguru
-from typeguard import check_type
+from typing import Callable
 
-from supbot import looper
-from supbot.model import Action, Event, ActionBuffer, ActionName
+
+from supbot.model import Action, ActionName, Event
 from supbot.system import System
 
-_action_buffer: ActionBuffer = []
-_system = System(loguru.logger)
 
+class Supbot:
+    def __init__(self, message_received: Callable[['Supbot', str, str], None] = None):
+        self._system = System(self)
 
-class IEventHandler(ABC):
-
-    @abstractmethod
-    def call_event(self, event: Event, params: Tuple):
-        pass
-
-
-class EventHandler(IEventHandler):
-
-    def __init__(self, message_received: Callable[[str, str], None] = None):
-        self.looper_thread = threading.Thread(target=looper.start, args=(_action_buffer, self, _system,))
         self.message_received = message_received
 
-    def wait_for_finish(self):
-        self.looper_thread.join()
-
-    def call_event(self, event: Event, params: Tuple):
-        if event == Event.MESSAGE_RECEIVED and self.message_received is not None:
-            self.message_received(params[0], params[1])
+    @property
+    def events(self):
+        return {
+            Event.MESSAGE_RECEIVED: self.message_received
+        }
 
     def __enter__(self):
-        self.looper_thread.start()
+        self._system.start()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self._system.quit()
+        self._system.wait_for_finish()
 
+    def wait_for_finish(self):
+        self._system.wait_for_finish()
 
-def send_message(name: str, message: str):
-    _action_buffer.append(Action(ActionName.SEND_MESSAGE, (name, message)))
+    def quit(self):
+        self._system.quit()
 
+    def is_on(self):
+        return self._system.is_on()
 
-def quit_supbot():
-    _system.quit()
+    def send_message(self, name: str, message: str):
+        self._system.get_action_buffer().append(Action(ActionName.SEND_MESSAGE, (name, message)))

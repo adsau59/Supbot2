@@ -30,7 +30,7 @@ Supbot2 is an unofficial WhatsApp automation library written in Python which can
 - To create an easy to use way of automating WhatsApp App.
 - To make a fail safe foundation for the developers to create their business logic without worrying about the stability and reliability of the application.
 
-### Requirements:
+### Requirements
 - Android phone/emulator
 - A phone number to setup WhatsApp
 - PC to run the Server
@@ -70,15 +70,15 @@ For now there is no installable package for Supbot2, so just
 ### Usage
 Following code resends the message received from (in just 5 LOC!)
 ```python
-import supbot
+from supbot import Supbot
 
 
-def repeat_message(contact_name, message):
+def repeat_message(supbot, contact_name, message):
     supbot.send_message(contact_name, message)
 
 
-with supbot.EventHandler(message_received=repeat_message) as e:
-    e.wait_for_finish()
+with Supbot(message_received=repeat_message) as bot:
+    bot.wait_for_finish()
 ```
 
 ## Roadmap

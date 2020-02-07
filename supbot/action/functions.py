@@ -1,15 +1,18 @@
+import typing
 from typing import Tuple, Dict
 
 from supbot.action import helper
 from supbot.model import State, ActionMeta, GUIState, ActionName
-from supbot.app_driver import IDriver
-from supbot.system import ISystem
+from supbot.app_driver import AppDriver
+
+if typing.TYPE_CHECKING:
+    from supbot.api import System
 
 
-def send_message(driver: IDriver, current: GUIState, system: ISystem, data: Tuple) -> GUIState:
+def send_message(driver: AppDriver, current: GUIState, system: 'System', data: Tuple) -> GUIState:
     chat_name, message = data
 
-    current = helper.change_state(driver, current, GUIState(State.CHAT, chat_name), system)
+    current = helper.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
 
     if current.state == State.CHAT:
         driver.type_and_send(message)

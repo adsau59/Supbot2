@@ -2,23 +2,22 @@ import typing
 
 from supbot import model
 from supbot.action import helper
-from supbot.model import State, ActionBuffer
+from supbot.model import State
 from supbot.app_driver import AppDriver
-from supbot.system import ISystem
 
 if typing.TYPE_CHECKING:
-    from supbot.api import IEventHandler
+    from supbot.api import System
 
 
-def start(buffer: ActionBuffer, event: 'IEventHandler', system: ISystem):
+def start(system: 'System'):
     driver = AppDriver()
     gui_state = model.GUIState(State.MAIN)
 
     system.get_logger().info("Started")
 
-    while system.is_on():
+    while system.is_on() and len(system.get_action_buffer()) > 0:
 
-        if len(buffer) == 0:
-            gui_state = helper.check_for_new_chat(system, driver, event, gui_state)
+        if len(system.get_action_buffer()) == 0:
+            gui_state = helper.check_for_new_chat(system, driver, gui_state)
         else:
-            gui_state = helper.execute_action(driver, buffer, gui_state, system)
+            gui_state = helper.execute_action(system, driver, gui_state)

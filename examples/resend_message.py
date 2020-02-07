@@ -1,9 +1,9 @@
-import supbot
+from supbot import Supbot
 
 
-def repeat_message(contact_name, message):
+def repeat_message(supbot, contact_name, message):
     supbot.send_message(contact_name, message)
 
 
-with supbot.EventHandler(message_received=repeat_message) as e:
-    e.wait_for_finish()
+with Supbot(message_received=repeat_message) as bot:
+    bot.wait_for_finish()
