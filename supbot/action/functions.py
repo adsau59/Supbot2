@@ -1,7 +1,7 @@
 import typing
 from typing import Tuple, Dict
 
-from supbot.action import helper
+from supbot.action import manager
 from supbot.model import State, ActionMeta, GUIState, ActionName
 from supbot.app_driver import AppDriver
 
@@ -12,7 +12,7 @@ if typing.TYPE_CHECKING:
 def send_message(driver: AppDriver, current: GUIState, system: 'System', data: Tuple) -> GUIState:
     chat_name, message = data
 
-    current = helper.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
+    current = manager.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
 
     if current.state == State.CHAT:
         driver.type_and_send(message)
