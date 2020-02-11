@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Supbot2 Docs</title>
+        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body class="homepage">
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href=".">Supbot2 Docs</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="active">
+                                <a href=".">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">How to Use <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="how-to-use/overview/">Overview</a>
+</li>
+                                    
+<li >
+    <a href="how-to-use/helper/">Helper</a>
+</li>
+                                    
+<li >
+    <a href="how-to-use/action/">Action</a>
+</li>
+                                    
+<li >
+    <a href="how-to-use/event/">Event</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="disabled">
+                                <a rel="next" >
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="how-to-use/overview/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#supbot2">Supbot2</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#license">License</a></li>
+            <li><a href="#contact">Contact</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="supbot2">Supbot2</h1>
+<p>Unoffical WhatsApp Automation Library for Python</p>
+<hr />
+<div align="center">
+  <img src="https://cdn.steemitimages.com/DQmVfVL98g7QbEyb4t4bt5A9DuMZLBYpiekwceBswjSUqTJ/small%20banner.jpg"/>
+</div>
+
+<h2 id="overview">Overview</h2>
+<p>Supbot2 is an unofficial WhatsApp automation library written in Python which can be used to create bots. Supbot2 uses Appium to automate WhatsApp application to read the GUI and call respective events, and perform various actions on the GUI.</p>
+<p><a href="https://github.com/adsau59/supbot">Supbot API (1.0)</a> was extremely tedious to setup and even more difficult to use. Not only that it required to have a phone and Supbot server connected to the Internet, which made it very unstable and unreliable. Supbot2 tries to fix these issues.</p>
+<h3 id="easy-to-use">Easy to Use</h3>
+<p>Supbot is exeremly easy and intuitive to use library. It's API is made of just two types of services: <code>Action</code> and <code>Events</code>, which are basically simple function calls.</p>
+<h3 id="aims-for-stability">Aims for Stability</h3>
+<p>Supbot aims for developers to just concentrate on building the business logic, and not to worry about how the library works. We want the API work flawlessly.</p>
+<hr />
+<h2 id="installation">Installation</h2>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Android phone/emulator</li>
+<li>A phone number to setup WhatsApp</li>
+<li>PC</li>
+</ul>
+<h3 id="installing-appium">Installing Appium</h3>
+<p>You will need to setup Appium and Whatsapp before you start with Supbot</p>
+<ul>
+<li>Download and install <a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a>, <a href="https://developer.android.com/studio/releases/sdk-tools">Android SDK</a>, and <a href="http://appium.io/downloads.html">Appium</a></li>
+<li>Create %JAVA_HOME% and %ANDROID_HOME% environment variables</li>
+<li>Connect your phone via usb, and start debuging </li>
+<li>-OR- Create an android emulator</li>
+<li>Install WhatsApp and set it up to reach on the main chat screen.</li>
+<li>Get <code>deviceName</code> of your android device by using <code>adb devices</code> command.</li>
+<li>Run appium server and try running this configuration with the <code>deviceName</code> of your device.</li>
+</ul>
+<pre><code>{
+&quot;appPackage&quot;: &quot;com.whatsapp&quot;,
+&quot;deviceName&quot;: &quot;&quot;,
+&quot;platformName&quot;: &quot;android&quot;,
+&quot;noReset&quot;: &quot;true&quot;,
+&quot;appActivity&quot;: &quot;com.whatsapp.HomeActivity&quot;
+}
+</code></pre>
+
+<p>If the whatsapp app opens up in your device automatically, Appium is setup perfectly</p>
+<h3 id="installing-supbot">Installing Supbot</h3>
+<p>You will need Python &gt;=3.6 in order to install supbot. Supbot is developed using <a href="https://www.python.org/downloads/release/python-371/">Python 3.7.1</a>, so its recomended to use that, so that you don't encouter unexpected issues.<br />
+<br/>
+Install the <code>supbot</code> package using</p>
+<pre><code>pip install supbot
+</code></pre>
+
+<hr />
+<h2 id="getting-started">Getting Started</h2>
+<p>Following code resends the message received from a contact (in just 5 LOC!).<br />
+Visit <a href="how-to-use/overview/">Overview</a> to understand the code.</p>
+<pre><code class="python">from supbot import Supbot
+
+
+def repeat_message(contact_name, message):
+    supbot.send_message(contact_name, message)
+
+
+with Supbot(message_received=repeat_message) as supbot:
+    supbot.wait_for_finish()
+</code></pre>
+
+<h2 id="roadmap">Roadmap</h2>
+<p>Check out the <a href="https://trello.com/b/aNlbWMEM/supbot2">Trello</a> board, to see what I'm working on and whats next.</p>
+<h2 id="license">License</h2>
+<p>Distributed under the MIT License. See <a href="https://github.com/adsau59/Supbot2/blob/master/LICENSE">LICENSE</a> for more information.</p>
+<h2 id="contact">Contact</h2>
+<p>If you have any problems or you want to contact me for feature ideas or want to collaborate in development you can contact me on <a href="https://discord.gg/V6e2fpc">DefineX Community discord server</a>.</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2020 <a href="https://twitter.com/adam_saudagar">Adam Saudagar</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2020-02-11 14:31:58
+-->

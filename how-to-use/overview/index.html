@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Overview - Supbot2 Docs</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Supbot2 Docs</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">How to Use <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li class="active">
+    <a href="./">Overview</a>
+</li>
+                                    
+<li >
+    <a href="../helper/">Helper</a>
+</li>
+                                    
+<li >
+    <a href="../action/">Action</a>
+</li>
+                                    
+<li >
+    <a href="../event/">Event</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../..">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../helper/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#how-to-use">How to use</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#example">Example</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="how-to-use">How to use</h1>
+<p>Overview of interfacing with Supbot</p>
+<hr />
+<p>Supbot encapsulates all its functionality into <code>Supbot</code> class. In order to use supbot's services you will have to create its instance. Even after you create the instance it need to start its services so that it becomes useable. It does that using <code>__enter__()</code> method. Also, it need to destroy its internal states before you stop using supbot, which it does using <code>__exit__()</code> method.</p>
+<p>So instead of using those methods directly, you can use <code>with - as</code> statement to create a scope in which supbot can be used without any worries.</p>
+<pre><code class="python">with Supbot() as supbot:
+    supbot.send_message(&quot;Adam&quot;, &quot;hi!&quot;);
+</code></pre>
+
+<hr />
+<h2 id="services">Services</h2>
+<p>There are two main sub-catagories of services that supbot provides which are, <code>Action</code>, <code>Events</code>, and <code>Helper</code>.</p>
+<h3 id="action">Action</h3>
+<p>Actions are services which allows the developer to perform operations in whatsapp, like sending a message, anything which is initiated by the developer is an Action. Check out <a href="../action/">Action</a> to learn more.</p>
+<h3 id="event">Event</h3>
+<p>Events are services which allows the developer to run code when an event occours in whatsapp, like reciving a message. Supbot provides event listeners so that you can register your own callback methods to be executed when an event occours. Check out <a href="../event/">Event</a> to learn more.</p>
+<h3 id="helper-services">Helper Services</h3>
+<p>Other than the above to main types of services, supbot also provides some helper methods. Check out <a href="../helper/">Helper</a> to learn more.</p>
+<hr />
+<h2 id="example">Example</h2>
+<pre><code class="python">from supbot import Supbot
+
+
+def repeat_message(contact_name, message):
+    supbot.send_message(contact_name, message)
+
+
+with Supbot(message_received=repeat_message) as supbot:
+    supbot.wait_for_finish()
+</code></pre>
+
+<p>Lets look at the getting started example, to understand each type of service much better. The code written below re-sends the message sent to the bot back. We will break down each part of the code, in order to understand how supbot API is used</p>
+<pre><code class="python">from supbot import Supbot
+</code></pre>
+
+<p>imports <code>Supbot</code> class which will be used to create its instance later on.</p>
+<pre><code class="python">def repeat_message(contact_name, message):
+</code></pre>
+
+<p>This is a function which is going to be used as an event callback.</p>
+<pre><code class="python">supbot.send_message(contact_name, message)
+</code></pre>
+
+<p>Over here we are using an <code>Action</code> service. <code>send_message</code> service just sends the message to the target contact. Over here we are getting the contact name from the event and we are directly passing it to the <code>Action</code>.</p>
+<pre><code class="python">with ... as supbot:
+</code></pre>
+
+<p>In order to use supbot we need to create an instance for it, and for it to make its services usable, it need to initialize itself, which is done using <code>with - as</code> statement.</p>
+<pre><code class="python">Supbot(message_received=repeat_message)
+</code></pre>
+
+<p>Constructor of supbot takes in the callback methods for events you want to use. Over here we are assigning the <code>repeat_message</code> method to <code>message_received</code> Event, so that when <code>message_received</code> Event occours, <code>repeat_message</code> method is called.</p>
+<pre><code class="python"> supbot.wait_for_finish()
+</code></pre>
+
+<p>This is a <code>Helper</code> service which allows the main thread to sleep till supbot is turned off. This is used so that the program doesn't quit.</p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2020 <a href="https://twitter.com/adam_saudagar">Adam Saudagar</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
