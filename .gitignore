@@ -2,3 +2,11 @@
 temp/
 venv/
 __pycache__/
+.tox/
+supbot.egg-info/
+/_build/
+build/
+dist/
+build.bat
+site/
+.eggs/

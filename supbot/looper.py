@@ -5,15 +5,14 @@ provides a function which is initializes and maintains state of supbot
 """
 
 import typing
-from supbot import model
-from supbot.action import manager
+from supbot import model, service_manager
 from supbot.model import State
 from supbot.app_driver import AppDriver
 if typing.TYPE_CHECKING:
     from supbot.api import System
 
 
-def start(system: 'System'):
+def start(system: 'System', device_name: str):
     """
     initializes services which is used internally in supbot
 
@@ -24,18 +23,25 @@ def start(system: 'System'):
 
     maintains `gui_state` which represents the state in which the app currently is in
 
+    :param device_name: name of the device to be used
     :param system: provides services and shared states which is used internally
     """
-    driver = AppDriver()
+    driver = AppDriver.create(device_name)
+
+    if driver is None:
+        system.logger.error("Driver couldn't be created successfully, maybe Appium is not running or your android "
+                            "device couldn't be found")
+        return
+
     gui_state = model.GUIState(State.MAIN)
 
     system.logger.info("Started")
 
-    while system.is_on() and len(system.action_buffer) > 0:
+    while system.is_on() or len(system.action_buffer) > 0:
 
         if len(system.action_buffer) == 0:
-            gui_state = manager.check_for_new_chat(system, driver, gui_state)
+            gui_state = service_manager.check_for_new_chat(system, driver, gui_state)
         else:
-            gui_state = manager.execute_action(system, driver, gui_state)
+            gui_state = service_manager.execute_action(system, driver, gui_state)
 
     driver.destroy()

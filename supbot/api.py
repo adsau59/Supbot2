@@ -21,13 +21,13 @@ class Supbot:
 
     Uses `System` to start and stop the services to make it usable
     """
-    def __init__(self, message_received: Callable[['Supbot', str, str], None] = None):
+    def __init__(self, device_name: str = None, message_received: Callable[[str, str], None] = None):
         """
         Takes in event callbacks, initializes the `System` object
 
         :param message_received: normal text message event callback
         """
-        self._system = System(self)
+        self._system = System(self, device_name)
 
         self.message_received = message_received
 

@@ -1,10 +1,25 @@
 """
-Sample application of supbot which takes in commands to run actions,
-and prints incoming events on screen
-made just to test the library
+supbot
+
+Usage:
+  supbot [--device=<str>]
+  supbot -h | --help
+  supbot -v | --version
+
+Options:
+  -h --help         Show this screen.
+  -v --version         Show version.
+  --device=<str>    Device name
+
 """
+import re
 
 from supbot import Supbot
+from docopt import docopt
+
+help_me = """Available commands:
+send <contact-name> <message>
+quit"""
 
 
 def process(supbot: Supbot, request_command: str):
@@ -16,12 +31,13 @@ def process(supbot: Supbot, request_command: str):
     :param request_command: request string
     :return:
     """
-    parts = request_command.split(" ")
+    match = re.findall(r"([^\s\"']+|\"([^\"]*)\"|'([^']*)')", request_command)
+    parts = [x[0] if x[1] == "" else x[1] for x in match]
     try:
         if parts[0] == "quit":
-            return supbot.quit()
-        elif parts[0] == "send_message":
-            return supbot.send_message(parts[1], parts[2])
+            supbot.quit()
+        elif parts[0] == "send":
+            supbot.send_message(parts[1], parts[2])
         else:
             return "Invalid command"
     except IndexError:
@@ -36,15 +52,15 @@ def start_loop(supbot: Supbot):
     :param supbot: supbot service
     """
     while supbot.is_on():
-        request = input("?")
-        response = process(supbot, request)
-        print(response)
+        request = input(">")
+        process(supbot, request)
 
 
-def print_message(supbot, contact, message):
+def print_message(_, contact, message):
     """
     callback method for message received event
 
+    :param _: supbot object, not useful in this instance
     :param contact: name of the contact
     :param message: message string
     """
@@ -53,9 +69,24 @@ def print_message(supbot, contact, message):
 
 def main():
     """
+    Sample application of supbot which takes in commands to run actions,
+    and prints incoming events on screen
+    made just to tests the library
+
     starts the bot then waits for input
     """
-    with Supbot(message_received=print_message) as supbot:
+    args = docopt(__doc__)
+
+    if args["--version"]:
+        from supbot import __version__
+        print("supbot v{}".format(__version__))
+        return
+
+    device_name = args["--device"]
+
+    print(help_me)
+
+    with Supbot(device_name=device_name, message_received=print_message) as supbot:
         start_loop(supbot)
 
 

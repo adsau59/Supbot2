@@ -5,10 +5,9 @@ Simple example which resends messages sent to the bot
 from supbot import Supbot
 
 
-def repeat_message(supbot, contact_name, message):
+def repeat_message(contact_name, message):
     """
     Supbot callbacks returns a reference for supbot's interface too
-    :param supbot:
     :param contact_name:
     :param message:
     :return:
@@ -21,5 +20,5 @@ Supbot requires to initialize before you can use its services, so it should neve
 you can use with-as statement in order to automatically initialize supbot.
 After it is created, you can use its services within its block.
 """
-with Supbot(message_received=repeat_message) as bot:
-    bot.wait_for_finish()
+with Supbot(message_received=repeat_message) as supbot:
+    supbot.wait_for_finish()

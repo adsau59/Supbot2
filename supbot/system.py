@@ -5,13 +5,13 @@ provides services to different systems of supbot,
 contains `System` class
 """
 
-from __future__ import annotations
+import logging
 import threading
 import typing
 from typing import Tuple
-import loguru
 from supbot import looper
 from supbot.model import ActionBuffer, Event
+
 if typing.TYPE_CHECKING:
     from supbot.api import Supbot
 
@@ -22,21 +22,26 @@ class System:
     provides interface to `Supbot` to control internal systems of supbot
     """
 
-    def __init__(self, supbot: 'Supbot'):
+    def __init__(self, supbot: 'Supbot', device_name: str):
         """
         Initialize shared states: action buffer, logger, status, which is used for different systems to comunicate
         initializes looper thread
         :param supbot: reference for the `Supbot` object, used to retrieve events at runtime
         """
+        logging.getLogger("selenium").setLevel(logging.ERROR)
+        logging.getLogger("urllib3").setLevel(logging.ERROR)
+
+        logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger("supbot")
 
         self._action_buffer: ActionBuffer = []
-        self._logger = loguru.logger
+        self._logger = logger
         self._status = True
-        self._looper_thread = threading.Thread(target=looper.start, args=(self,))
+        self._looper_thread = threading.Thread(target=looper.start, args=(self, device_name))
         self._supbot = supbot
 
     @property
-    def logger(self) -> loguru.Logger:
+    def logger(self):
         """
         Provides logging services
         :return: logger object
@@ -82,7 +87,7 @@ class System:
         """
         callback = self._supbot.events[event]
         if callback is not None:
-            callback(self, *params)
+            callback(*params)
 
     def is_on(self) -> bool:
         """

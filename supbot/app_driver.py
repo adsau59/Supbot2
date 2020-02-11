@@ -4,7 +4,8 @@ app_driver.py
 provides an interface for the lower level appium calls to other systems of supbot
 will be reworked to handle more exceptions
 """
-
+import re
+from subprocess import check_output
 from typing import Tuple, Optional
 from appium.webdriver import Remote
 import time
@@ -17,18 +18,29 @@ class AppDriver:
     Abstracts appium calls
     """
 
-    def __init__(self):
+    @staticmethod
+    def create(device_name: str):
         """
         Initializes appium driver
+        :type device_name: name of the device to be used, if it is none, it uses adb command to fetch it
         """
-        desired_caps = {
-            'platformName': 'Android',
-            'deviceName': '71856f60',
-            'appPackage': 'com.whatsapp',
-            'appActivity': 'com.whatsapp.HomeActivity',
-            'noReset': 'true'
-        }
-        self.driver = Remote('http://localhost:4723/wd/hub', desired_caps)
+        try:
+            if device_name is None:
+                adb_ouput = check_output(["adb", "devices"]).decode('utf-8')
+                device_name = re.search(r'^(.+)\tdevice', adb_ouput, flags=re.MULTILINE).group(1)
+
+            desired_caps = {
+                'platformName': 'Android',
+                'deviceName': device_name,
+                'appPackage': 'com.whatsapp',
+                'appActivity': 'com.whatsapp.HomeActivity',
+                'noReset': 'true'
+            }
+            app_driver = AppDriver()
+            app_driver.driver = Remote('http://localhost:4723/wd/hub', desired_caps)
+            return app_driver
+        except Exception:
+            return None
 
     def destroy(self):
         """

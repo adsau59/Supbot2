@@ -1,0 +1,11 @@
+site_name: Supbot2 Docs
+
+nav:
+    - Home: index.md
+    - How to Use:
+        - Overview: how-to-use/overview.md
+        - Helper: how-to-use/helper.md
+        - Action: how-to-use/action.md
+        - Event: how-to-use/event.md
+        
+copyright: Copyright &copy; 2020 <a href="https://twitter.com/adam_saudagar">Adam Saudagar</a>

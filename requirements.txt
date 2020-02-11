@@ -1,5 +1,4 @@
-flask
+docopt
 selenium
-loguru
 typeguard
 Appium-Python-Client
