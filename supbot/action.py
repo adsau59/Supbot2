@@ -9,6 +9,7 @@ from typing import Tuple, Dict
 from supbot import service_manager
 from supbot.model import State, ActionMeta, GUIState, ActionName
 from supbot.app_driver import AppDriver
+
 if typing.TYPE_CHECKING:
     from supbot.api import System
 
@@ -25,12 +26,13 @@ def send_message(driver: AppDriver, current: GUIState, system: 'System', data: T
     """
     chat_name, message = data
 
-    current = service_manager.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
+    error, current = service_manager.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
 
-    if current.state == State.CHAT:
+    if not error and current.state == State.CHAT:
         driver.type_and_send(message)
-
-    system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
+        system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
+    else:
+        system.logger.debug("Message failed")
 
     return current
 

@@ -25,6 +25,7 @@ class Supbot:
         """
         Takes in event callbacks, initializes the `System` object
 
+        :param device_name: name of the device you want to control, by default it fetches automatically
         :param message_received: normal text message event callback
         """
         self._system = System(self, device_name)

@@ -4,6 +4,7 @@ app_driver.py
 provides an interface for the lower level appium calls to other systems of supbot
 will be reworked to handle more exceptions
 """
+import os
 import re
 from subprocess import check_output
 from typing import Tuple, Optional
@@ -18,8 +19,11 @@ class AppDriver:
     Abstracts appium calls
     """
 
+    def __init__(self, driver: Remote):
+        self.driver = driver
+
     @staticmethod
-    def create(device_name: str):
+    def create(device_name: str) -> Optional['AppDriver']:
         """
         Initializes appium driver
         :type device_name: name of the device to be used, if it is none, it uses adb command to fetch it
@@ -36,9 +40,9 @@ class AppDriver:
                 'appActivity': 'com.whatsapp.HomeActivity',
                 'noReset': 'true'
             }
-            app_driver = AppDriver()
-            app_driver.driver = Remote('http://localhost:4723/wd/hub', desired_caps)
-            return app_driver
+            driver = Remote('http://localhost:4723/wd/hub', desired_caps)
+            driver.implicitly_wait(5)
+            return AppDriver(driver)
         except Exception:
             return None
 
@@ -54,11 +58,28 @@ class AppDriver:
         :param chat_name: name of the contact
         """
         try:
-            element = self.driver.find_element_by_xpath(
-                '//android.widget.TextView[contains(@text,"{}")]'.format(chat_name))
+            search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+            element = next(x for x in search if x.text == chat_name)
             element.click()
             return True
+        except Exception:
+            return False
+
+    def search_chat(self, chat_name: str) -> bool:
+        try:
+            self.driver.find_element_by_id("com.whatsapp:id/menuitem_search").click()
+            self.driver.find_element_by_id("com.whatsapp:id/search_src_text").send_keys(chat_name)
+            return True
         except NoSuchElementException:
+            return False
+
+    def chat_via_intent(self, phone_number):
+        try:
+            self.driver.start_activity("com.whatsapp", "com.whatsapp.Conversation",
+                                       intent_action="android.intent.action.SENDTO smsto:{}".format(phone_number))
+            return True
+        except:
+            self.driver.start_activity("com.whatsapp", "com.whatsapp.HomeActivity")
             return False
 
     def type_and_send(self, message: str):
@@ -81,7 +102,6 @@ class AppDriver:
         presses the back button, then waits for animation/load to finish
         """
         self.driver.press_keycode(4)
-        time.sleep(1)
 
     def get_new_chat(self) -> Optional['model.Chat']:
         """
@@ -113,3 +133,18 @@ class AppDriver:
             return messages
         except NoSuchElementException:
             return None
+
+    def send_image(self, image_loc: str) -> bool:
+        try:
+            _, ext = os.path.splitext(image_loc)
+            os.utime(image_loc, (time.time(), time.time()))
+            self.driver.push_file(destination_path="/storage/emulated/0/Supbot/temp" + ext,
+                                  source_path=image_loc)
+            self.driver.find_element_by_id("com.whatsapp:id/input_attach_button").click()
+            self.driver.find_element_by_id("com.whatsapp:id/pickfiletype_gallery").click()
+            self.driver.find_element_by_xpath('//android.widget.TextView[@text="Supbot"]').click()
+            self.driver.find_element_by_xpath('//android.widget.ImageView').click()
+            self.driver.find_element_by_id("com.whatsapp:id/send").click()
+            return True
+        except:
+            return False

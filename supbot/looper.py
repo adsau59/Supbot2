@@ -4,12 +4,16 @@ looper.py
 provides a function which is initializes and maintains state of supbot
 """
 
+from typing import Callable, List
 import typing
 from supbot import model, service_manager
 from supbot.model import State
 from supbot.app_driver import AppDriver
+
 if typing.TYPE_CHECKING:
     from supbot.api import System
+
+_test_function: List[Callable[[AppDriver, model.GUIState], None]] = []
 
 
 def start(system: 'System', device_name: str):
@@ -43,5 +47,8 @@ def start(system: 'System', device_name: str):
             gui_state = service_manager.check_for_new_chat(system, driver, gui_state)
         else:
             gui_state = service_manager.execute_action(system, driver, gui_state)
+
+        if _test_function:
+            _test_function.pop(0)(driver, gui_state)
 
     driver.destroy()
