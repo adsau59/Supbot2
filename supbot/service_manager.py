@@ -34,7 +34,7 @@ def check_for_new_chat(system: 'System', driver: AppDriver,
     _, current = change_state(system, driver, current, GUIState(State.MAIN))
     chat = driver.get_new_chat()
     if chat is not None:
-        current = change_state(system, driver, current, GUIState(State.CHAT, chat.name))
+        _, current = change_state(system, driver, current, GUIState(State.CHAT, chat.name))
         messages = driver.get_new_messages()
 
         for m in messages:
@@ -87,7 +87,6 @@ def change_state(system: 'System', driver: AppDriver, _from: GUIState, _to: GUIS
             return 0, _to
 
     elif _to.state == State.CHAT:
-
         if _from.state == State.MAIN:
 
             if driver.click_on_chat(_to.info):
@@ -109,8 +108,11 @@ def change_state(system: 'System', driver: AppDriver, _from: GUIState, _to: GUIS
                     else:
                         system.logger.debug("{} not a phone number".format(_to.info))
 
-        elif _from.state == State.CHAT and _from.info != _to.info:
-            driver.press_back()
-            return change_state(system, driver, GUIState(State.MAIN), _to)
+        elif _from.state == State.CHAT:
+            if _from.info != _to.info:
+                driver.press_back()
+                return change_state(system, driver, GUIState(State.MAIN), _to)
+            else:
+                return 0, _to
 
     return 1, _from
