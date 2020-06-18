@@ -78,6 +78,9 @@ class Supbot:
         """
         return self._system.is_on()
 
+    def has_started(self) -> bool:
+        return self._system.has_started()
+
     def send_message(self, contact_name: str, message: str):
         """
         Send Message action

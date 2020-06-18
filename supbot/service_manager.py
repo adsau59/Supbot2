@@ -72,6 +72,7 @@ def execute_action(system: 'System', driver: AppDriver, current: GUIState) -> GU
 
 def change_state(system: 'System', driver: AppDriver, _from: GUIState, _to: GUIState) -> Tuple[int, GUIState]:
     """
+    meats of supbot brain, responsible for switching screen using a state machine
     performs appropriate actions on the gui to reach the target gui state
     Changes gui state and returns the updated state object depending on success or failure
     :param system: `System` object

@@ -37,6 +37,7 @@ class System:
         self._action_buffer: ActionBuffer = []
         self._logger = logger
         self._status = True
+        self._started = False
         self._looper_thread = threading.Thread(target=looper.start, args=(self, device_name))
         self._supbot = supbot
 
@@ -79,6 +80,9 @@ class System:
         """
         self._status = False
 
+    def started(self):
+        self._started = True
+
     def call_event(self, event: Event, params: Tuple):
         """
         Used to internal part of supbot to call events
@@ -95,3 +99,6 @@ class System:
         :return: `_status` flag
         """
         return self._status
+
+    def has_started(self) -> bool:
+        return self._started

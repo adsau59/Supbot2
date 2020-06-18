@@ -13,6 +13,7 @@ Options:
 
 """
 import re
+import time
 
 from supbot import Supbot
 from docopt import docopt
@@ -51,12 +52,17 @@ def start_loop(supbot: Supbot):
 
     :param supbot: supbot service
     """
+    while not supbot.has_started():
+        time.sleep(0.5)
+
+    print(help_me)
+
     while supbot.is_on():
         request = input(">")
         process(supbot, request)
 
 
-def print_message(_, contact, message):
+def print_message(contact, message):
     """
     callback method for message received event
 
@@ -84,7 +90,7 @@ def main():
 
     device_name = args["--device"]
 
-    print(help_me)
+    print("Loading...")
 
     with Supbot(device_name=device_name, message_received=print_message) as supbot:
         start_loop(supbot)

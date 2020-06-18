@@ -40,6 +40,7 @@ def start(system: 'System', device_name: str):
     gui_state = model.GUIState(State.MAIN)
 
     system.logger.info("Started")
+    system.started()
 
     while system.is_on() or len(system.action_buffer) > 0:
 
