@@ -23,7 +23,7 @@ class System:
     provides interface to `Supbot` to control internal systems of supbot
     """
 
-    def __init__(self, supbot: 'Supbot', device_name: str):
+    def __init__(self, supbot: 'Supbot'):
         """
         Initialize shared states: action buffer, logger, status, which is used for different systems to comunicate
         initializes looper thread
@@ -38,7 +38,7 @@ class System:
         logging.getLogger().handlers = []
 
         g.logger = logging.getLogger("supbot")
-        FORMAT = "%(name)s - %(levelname)s - %(message)s'"
+        FORMAT = "%(name)s - %(levelname)s - %(message)s"
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(fmt=FORMAT))
         g.logger.addHandler(handler)
@@ -50,7 +50,7 @@ class System:
         self.status = 1
         self._action_buffer: ActionBuffer = []
         self._logger = g.logger
-        self._looper_thread = threading.Thread(target=looper.start, args=(self, device_name))
+        self._looper_thread = threading.Thread(target=looper.start, args=(self,))
         self._supbot = supbot
         g.system = self
 

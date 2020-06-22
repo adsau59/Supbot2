@@ -24,7 +24,7 @@ class Supbot:
 
     Uses `System` to start and stop the services to make it usable
     """
-    def __init__(self, device_name: str = None, message_received: Callable[[str, str], None] = None, **kwargs):
+    def __init__(self, message_received: Callable[[str, str], None] = None, **kwargs):
         """
         Takes in event callbacks, initializes the `System` object
 
@@ -32,7 +32,7 @@ class Supbot:
         :param message_received: normal text message event callback
         """
         g.kwargs = kwargs
-        self._system = System(self, device_name)
+        self._system = System(self)
 
         self.message_received = message_received
 

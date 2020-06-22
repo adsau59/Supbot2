@@ -14,7 +14,7 @@ from typing import Tuple, Optional
 from appium.webdriver import Remote
 import time
 from selenium.common.exceptions import NoSuchElementException
-from supbot import model, g
+from supbot import model, g, helper
 
 
 class AppDriver:
@@ -26,33 +26,44 @@ class AppDriver:
         self.driver = driver
 
     @staticmethod
-    def create(device_name: str) -> Optional['AppDriver']:
+    def create() -> Optional['AppDriver']:
         """
         Initializes appium driver
         :type device_name: name of the device to be used, if it is none, it uses adb command to fetch it
         """
         try:
+            run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
+
+            if "port" in g.kwargs and g.kwargs["port"] is not None:
+                port = g.kwargs["port"]
+            elif run_server:
+                port = str(helper.get_free_tcp_port())
+            else:
+                port = "4723"
+
             g.logger.info("Finding android device")
-            if device_name is None:
+            if "device_name" not in g.kwargs or g.kwargs["device_name"] is None:
                 adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
                 adb_ouput = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
                 device_name = re.search(r'^(.+)\tdevice', adb_ouput, flags=re.MULTILINE).group(1)
 
-            if not g.kwargs["no_server"]:
+            if run_server:
                 def appium_logging():
-                    g.logger.info("launching appium server")
+                    g.logger.info("launching appium server on {}".format(port))
                     try:
-                        appium_process = subprocess.Popen(shlex.split("appium"), stdout=subprocess.PIPE, shell=True)
+                        appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)), stdout=subprocess.PIPE, shell=True)
                         appium_logs = logging.getLogger('appium')
                         while g.system.status > -1:
                             line = appium_process.stdout.readline().decode('utf-8')
                             appium_logs.debug(line)
+                        appium_process.stdout.close()
+                        appium_process.kill()
                     except FileNotFoundError:
                         logging.error("Appium not installed")
 
                 threading.Thread(target=appium_logging).start()
 
-            g.logger.info("Connecting to appium on {}".format(device_name))
+            g.logger.info("Connecting to appium with {}".format(device_name))
             desired_caps = {
                 'platformName': 'Android',
                 'deviceName': device_name,
@@ -60,7 +71,7 @@ class AppDriver:
                 'appActivity': 'com.whatsapp.HomeActivity',
                 'noReset': 'true'
             }
-            driver = Remote('http://localhost:4723/wd/hub', desired_caps)
+            driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
             driver.implicitly_wait(5)
             g.logger.info("driver created")
             return AppDriver(driver)
@@ -136,6 +147,7 @@ class AppDriver:
         """
         presses the back button, then waits for animation/load to finish
         """
+        time.sleep(0.5)
         self.driver.press_keycode(4)
 
     def get_new_chat(self) -> Optional['model.Chat']:

@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 _test_function: List[Callable[[AppDriver, model.GUIState], None]] = []
 
 
-def start(system: 'System', device_name: str):
+def start(system: 'System'):
     """
     initializes services which is used internally in supbot
 
@@ -30,7 +30,7 @@ def start(system: 'System', device_name: str):
     :param device_name: name of the device to be used
     :param system: provides services and shared states which is used internally
     """
-    driver = AppDriver.create(device_name)
+    driver = AppDriver.create()
 
     if driver is None:
         system.logger.error("Driver couldn't be created successfully, maybe Appium is not running or your android "

@@ -98,19 +98,23 @@ def change_state(system: 'System', driver: AppDriver, _from: GUIState, _to: GUIS
                     return 0, _to
                 else:
                     system.logger.debug("Didn't find chat {} in search, trying intent".format(_to.info))
-                    time.sleep(0.5)
                     driver.press_back()
-                    time.sleep(0.5)
                     driver.press_back()
 
                     if re.search("\d{11,13}", _to.info):
                         # todo if by chance this halts in between it will mess up the states
-                        if driver.search_chat("!temp") and driver.click_on_chat("!temp") \
-                                and driver.type_and_send(f"wa.me/{_to.info}") and driver.click_on_last_chat_link():
-                            if not driver.click_ok():
-                                return 0, _to
+                        if driver.search_chat("!temp") and driver.click_on_chat("!temp"):
+                            if driver.type_and_send(f"wa.me/{_to.info}") and driver.click_on_last_chat_link():
+                                if not driver.click_ok():
+                                    return 0, _to
+                                else:
+                                    system.logger.debug("{} not found in Whatsapp".format(_to.info))
                             else:
-                                system.logger.debug("{} not found in Whatsapp".format(_to.info))
+                                system.logger.warning("This could lead to state mismatch, "
+                                                      "if that happens contact the dev")
+                                driver.press_back()
+                        else:
+                            system.logger.debug("Please create an empty group with `!temp` name")
                     else:
                         system.logger.debug("{} not a valid phone number".format(_to.info))
 
