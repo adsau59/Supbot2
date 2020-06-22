@@ -2,7 +2,7 @@
 supbot
 
 Usage:
-  supbot [--device=<str>] [--no-server] [--port=<int>]
+  supbot [--device=<str>] [--no-server] [--port=<int>] [--no-prompt]
   supbot -h | --help
   supbot -v | --version
 
@@ -12,10 +12,14 @@ Options:
   --device=<str>    Device name
   --no-server       Doesn't run appium server
   --port=<int>      Port number to use to create/connect appium server
+  --no-prompt       Don't use interactive console
 
 """
 import re
 import time
+
+from prompt_toolkit import prompt
+from prompt_toolkit.patch_stdout import patch_stdout
 
 from supbot import Supbot
 from docopt import docopt
@@ -47,11 +51,12 @@ def process(supbot: Supbot, request_command: str):
         return "Insufficient Arguments"
 
 
-def start_loop(supbot: Supbot):
+def start_loop(supbot: Supbot, no_prompt: bool):
     """
     Waits for input, then processes the input when entered
     loops till supbot is running
 
+    :param no_prompt:
     :param supbot: supbot service
     """
     while not supbot.has_started():
@@ -59,8 +64,13 @@ def start_loop(supbot: Supbot):
 
     print(help_me)
 
+    def get_input():
+        with patch_stdout():
+            while supbot.is_on():
+                yield prompt("> ")
+
     while supbot.is_on():
-        request = input(">")
+        request = input("> ") if no_prompt else next(get_input())
         process(supbot, request)
 
 
@@ -94,7 +104,7 @@ def main():
 
     with Supbot(message_received=print_message, no_server=args["--no-server"],
                 port=args["--port"], device_name=args["--device"]) as supbot:
-        start_loop(supbot)
+        start_loop(supbot, args["--no-prompt"])
 
 
 if __name__ == "__main__":

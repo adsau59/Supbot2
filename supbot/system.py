@@ -29,6 +29,15 @@ class System:
         initializes looper thread
         :param supbot: reference for the `Supbot` object, used to retrieve events at runtime
         """
+
+        class PrintStreamHandler(logging.StreamHandler):
+            def __init__(self):
+                logging.StreamHandler.__init__(self)
+
+            def emit(self, record):
+                msg = self.format(record)
+                print(msg)
+
         logging.getLogger("selenium").setLevel(logging.ERROR)
         logging.getLogger("urllib3").setLevel(logging.ERROR)
         logging.getLogger("appium").setLevel(logging.DEBUG)
@@ -39,7 +48,7 @@ class System:
 
         g.logger = logging.getLogger("supbot")
         FORMAT = "%(name)s - %(levelname)s - %(message)s"
-        handler = logging.StreamHandler()
+        handler = PrintStreamHandler()
         handler.setFormatter(logging.Formatter(fmt=FORMAT))
         g.logger.addHandler(handler)
 

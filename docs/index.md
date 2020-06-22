@@ -36,7 +36,7 @@ You will need to setup Appium and Whatsapp before you start with Supbot
 - Download and install [JDK](https://www.oracle.com/in/java/technologies/javase/javase-jdk8-downloads.html), [Android Studio](https://developer.android.com/studio), and [NPM](https://nodejs.org/en/)
 - Create `JAVA_HOME` environment variable by default it is `C:\PROGRA~1\Java\jdk1.8.0_181` in windows (don't forget to change the jdk version depending on what version you have installed)
 - Create `ANDROID_HOME` environment variable by default it is `%USERPROFILE%\AppData\Local\Android\Sdk`in windows
-- Install Appium using `npm install -g appium`
+- Install Appium using `npm install -g appium@1.5.1`
 - Connect your phone via usb, and start debugging 
 - -OR- Create and run android emulator using AVD manager
 - Install WhatsApp and set it up to reach on the main chat screen.

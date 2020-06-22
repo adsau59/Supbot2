@@ -91,9 +91,7 @@ class AppDriver:
         """
         try:
             search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
-
-            # todo instead of equating the number directly, normalize it then compare
-            element = next(x for x in search if x.text == chat_name)
+            element = next(x for x in search if helper.contact_number_equal(x.text, chat_name))
             element.click()
             return True
         except Exception:
