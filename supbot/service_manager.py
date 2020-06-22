@@ -103,11 +103,16 @@ def change_state(system: 'System', driver: AppDriver, _from: GUIState, _to: GUIS
                     time.sleep(0.5)
                     driver.press_back()
 
-                    if re.search("\+\d{0,2}\d{10}", _to.info):
-                        if driver.chat_via_intent(_to.info):
-                            return 0, _to
+                    if re.search("\d{11,13}", _to.info):
+                        # todo if by chance this halts in between it will mess up the states
+                        if driver.search_chat("!temp") and driver.click_on_chat("!temp") \
+                                and driver.type_and_send(f"wa.me/{_to.info}") and driver.click_on_last_chat_link():
+                            if not driver.click_ok():
+                                return 0, _to
+                            else:
+                                system.logger.debug("{} not found in Whatsapp".format(_to.info))
                     else:
-                        system.logger.debug("{} not a phone number".format(_to.info))
+                        system.logger.debug("{} not a valid phone number".format(_to.info))
 
         elif _from.state == State.CHAT:
             if _from.info != _to.info:

@@ -9,13 +9,14 @@ import logging
 import threading
 import typing
 from typing import Tuple
-from supbot import looper
+from supbot import looper, g
 from supbot.model import ActionBuffer, Event
 
 if typing.TYPE_CHECKING:
     from supbot.api import Supbot
 
 
+# noinspection PyMethodMayBeStatic
 class System:
     """
     maintains shared states, and makes different states work together,
@@ -30,16 +31,28 @@ class System:
         """
         logging.getLogger("selenium").setLevel(logging.ERROR)
         logging.getLogger("urllib3").setLevel(logging.ERROR)
+        logging.getLogger("appium").setLevel(logging.DEBUG)
 
         logging.basicConfig(level=logging.DEBUG)
-        logger = logging.getLogger("supbot")
 
+        logging.getLogger().handlers = []
+
+        g.logger = logging.getLogger("supbot")
+        FORMAT = "%(name)s - %(levelname)s - %(message)s'"
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(fmt=FORMAT))
+        g.logger.addHandler(handler)
+
+        appium_logs = logging.getLogger('appium')
+        fh = logging.FileHandler('appium.log')
+        appium_logs.addHandler(fh)
+
+        self.status = 1
         self._action_buffer: ActionBuffer = []
-        self._logger = logger
-        self._status = True
-        self._started = False
+        self._logger = g.logger
         self._looper_thread = threading.Thread(target=looper.start, args=(self, device_name))
         self._supbot = supbot
+        g.system = self
 
     @property
     def logger(self):
@@ -78,10 +91,7 @@ class System:
         Turns `_status` flag False
         used to tell other systems, that supbot has to be turned off
         """
-        self._status = False
-
-    def started(self):
-        self._started = True
+        self.status = 0
 
     def call_event(self, event: Event, params: Tuple):
         """
@@ -98,7 +108,11 @@ class System:
         Used to check `_status` flag
         :return: `_status` flag
         """
-        return self._status
+        return self.status > 0
 
     def has_started(self) -> bool:
-        return self._started
+        """
+        Used to check `_status` flag
+        :return: `_status` flag
+        """
+        return self.status > 1

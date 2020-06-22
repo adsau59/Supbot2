@@ -2,14 +2,15 @@
 supbot
 
 Usage:
-  supbot [--device=<str>]
+  supbot [--device=<str>] [--no-server]
   supbot -h | --help
   supbot -v | --version
 
 Options:
   -h --help         Show this screen.
-  -v --version         Show version.
+  -v --version      Show version.
   --device=<str>    Device name
+  --no-server       Doesn't run appium server
 
 """
 import re
@@ -92,7 +93,7 @@ def main():
 
     print("Loading...")
 
-    with Supbot(device_name=device_name, message_received=print_message) as supbot:
+    with Supbot(device_name=device_name, message_received=print_message, no_server=args["--no-server"]) as supbot:
         start_loop(supbot)
 
 

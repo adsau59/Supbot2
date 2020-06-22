@@ -6,10 +6,13 @@ abstracts the developer using supbot library from the underlying systems
 """
 
 from typing import Callable, Dict
+
+from supbot import g, system
 from supbot.model import Action, ActionName, Event
 from supbot.system import System
 
 
+# noinspection PyMethodMayBeStatic
 class Supbot:
     """
     Supbot
@@ -21,13 +24,14 @@ class Supbot:
 
     Uses `System` to start and stop the services to make it usable
     """
-    def __init__(self, device_name: str = None, message_received: Callable[[str, str], None] = None):
+    def __init__(self, device_name: str = None, message_received: Callable[[str, str], None] = None, **kwargs):
         """
         Takes in event callbacks, initializes the `System` object
 
         :param device_name: name of the device you want to control, by default it fetches automatically
         :param message_received: normal text message event callback
         """
+        g.kwargs = kwargs
         self._system = System(self, device_name)
 
         self.message_received = message_received

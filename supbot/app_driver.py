@@ -4,14 +4,17 @@ app_driver.py
 provides an interface for the lower level appium calls to other systems of supbot
 will be reworked to handle more exceptions
 """
+import logging
 import os
 import re
-from subprocess import check_output
+import shlex
+import subprocess
+import threading
 from typing import Tuple, Optional
 from appium.webdriver import Remote
 import time
 from selenium.common.exceptions import NoSuchElementException
-from supbot import model
+from supbot import model, g
 
 
 class AppDriver:
@@ -29,10 +32,27 @@ class AppDriver:
         :type device_name: name of the device to be used, if it is none, it uses adb command to fetch it
         """
         try:
+            g.logger.info("Finding android device")
             if device_name is None:
-                adb_ouput = check_output(["adb", "devices"]).decode('utf-8')
+                adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
+                adb_ouput = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
                 device_name = re.search(r'^(.+)\tdevice', adb_ouput, flags=re.MULTILINE).group(1)
 
+            if not g.kwargs["no_server"]:
+                def appium_logging():
+                    g.logger.info("launching appium server")
+                    try:
+                        appium_process = subprocess.Popen(shlex.split("appium"), stdout=subprocess.PIPE, shell=True)
+                        appium_logs = logging.getLogger('appium')
+                        while g.system.status > -1:
+                            line = appium_process.stdout.readline().decode('utf-8')
+                            appium_logs.debug(line)
+                    except FileNotFoundError:
+                        logging.error("Appium not installed")
+
+                threading.Thread(target=appium_logging).start()
+
+            g.logger.info("Connecting to appium on {}".format(device_name))
             desired_caps = {
                 'platformName': 'Android',
                 'deviceName': device_name,
@@ -42,9 +62,10 @@ class AppDriver:
             }
             driver = Remote('http://localhost:4723/wd/hub', desired_caps)
             driver.implicitly_wait(5)
+            g.logger.info("driver created")
             return AppDriver(driver)
-        except Exception:
-            return None
+        except FileNotFoundError:
+            logging.error("Device not found; make sure device is connected using `adb devices` command")
 
     def destroy(self):
         """
@@ -59,6 +80,8 @@ class AppDriver:
         """
         try:
             search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+
+            # todo instead of equating the number directly, normalize it then compare
             element = next(x for x in search if x.text == chat_name)
             element.click()
             return True
@@ -95,6 +118,18 @@ class AppDriver:
             element.click()
             return True
         except NoSuchElementException:
+            return False
+
+    def click_on_last_chat_link(self):
+        self.driver.find_elements_by_id("com.whatsapp:id/message_text").pop().click()
+        return True
+
+    def click_ok(self):
+        try:
+            ok = self.driver.find_element_by_id("android:id/button1")
+            ok.click()
+            return True
+        except  NoSuchElementException:
             return False
 
     def press_back(self):

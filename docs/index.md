@@ -30,26 +30,17 @@ Supbot aims for developers to just concentrate on building the business logic, a
 - A phone number to setup WhatsApp
 - PC
 
-### Installing Appium
+### Creating Environment
 You will need to setup Appium and Whatsapp before you start with Supbot
 
-- Download and install [JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html), [Android SDK](https://developer.android.com/studio/releases/sdk-tools), and [Appium](http://appium.io/downloads.html)
-- Create %JAVA_HOME% and %ANDROID_HOME% environment variables
-- Connect your phone via usb, and start debuging 
-- -OR- Create an android emulator
+- Download and install [JDK](https://www.oracle.com/in/java/technologies/javase/javase-jdk8-downloads.html), [Android Studio](https://developer.android.com/studio), and [NPM](https://nodejs.org/en/)
+- Create `JAVA_HOME` environment variable by default it is `C:\PROGRA~1\Java\jdk1.8.0_181` in windows (don't forget to change the jdk version depending on what version you have installed)
+- Create `ANDROID_HOME` environment variable by default it is `%USERPROFILE%\AppData\Local\Android\Sdk`in windows
+- Install Appium using `npm install -g appium`
+- Connect your phone via usb, and start debugging 
+- -OR- Create and run android emulator using AVD manager
 - Install WhatsApp and set it up to reach on the main chat screen.
-- Get `deviceName` of your android device by using `adb devices` command.
-- Run appium server and try running this configuration with the `deviceName` of your device.
-```
-{
-"appPackage": "com.whatsapp",
-"deviceName": "",
-"platformName": "android",
-"noReset": "true",
-"appActivity": "com.whatsapp.HomeActivity"
-}
-```
-If the whatsapp app opens up in your device automatically, Appium is setup perfectly
+- (Optional) Create an empty whatsapp group named `!temp` (You can do this by adding 1 contact to the group then kicking them out)
 
 ### Installing Supbot
 You will need Python >=3.6 in order to install supbot. Supbot is developed using [Python 3.7.1](https://www.python.org/downloads/release/python-371/), so its recomended to use that, so that you don't encouter unexpected issues.  
@@ -58,6 +49,8 @@ Install the `supbot` package using
 ```
 pip install supbot
 ```
+You can test supbot by running `supbot` in terminal / powershell, and use the given commands to run some test functions
+
 ---
 
 ## Getting Started

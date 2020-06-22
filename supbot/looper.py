@@ -6,7 +6,7 @@ provides a function which is initializes and maintains state of supbot
 
 from typing import Callable, List
 import typing
-from supbot import model, service_manager
+from supbot import model, service_manager, g
 from supbot.model import State
 from supbot.app_driver import AppDriver
 
@@ -40,7 +40,7 @@ def start(system: 'System', device_name: str):
     gui_state = model.GUIState(State.MAIN)
 
     system.logger.info("Started")
-    system.started()
+    system.status = 2
 
     while system.is_on() or len(system.action_buffer) > 0:
 
@@ -53,3 +53,4 @@ def start(system: 'System', device_name: str):
             _test_function.pop(0)(driver, gui_state)
 
     driver.destroy()
+    system.status = -1
