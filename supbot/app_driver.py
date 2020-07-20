@@ -17,6 +17,7 @@ from selenium.common.exceptions import NoSuchElementException
 from supbot import g, helper
 
 
+# noinspection PyBroadException
 class AppDriver:
     """
     Abstracts appium calls
@@ -52,7 +53,8 @@ class AppDriver:
                 def appium_logging():
                     g.logger.info("launching appium server on {}".format(port))
                     try:
-                        appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)), stdout=subprocess.PIPE, shell=True)
+                        appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)),
+                                                          stdout=subprocess.PIPE, shell=True)
                         appium_logs = logging.getLogger('appium')
                         while g.system.status > -1:
                             line = appium_process.stdout.readline().decode('utf-8')

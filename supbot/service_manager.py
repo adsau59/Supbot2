@@ -46,20 +46,16 @@ def execute_action(current: GUIState) -> GUIState:
     :return: resultant state of gui after action is executed
     """
     try:
-        action_name, data = g.system.action_buffer.pop()
+        action_id, action = g.system.action_buffer.popitem()
     except IndexError:
         return current
 
-    # meta = actions[action.name]
+    action_name, data = action
 
-    # try:
-    #     check_type(action.name.name, action.data, meta.data_type)  # msg, data, type
-    # except TypeError:
-    #     system.logger.warning("Action Data Typing incorrect for {} : got {} expected {}"
-    #                           .format(action.name, action.data, meta.data_type))
-    #
-    #     return current
+    success, current = actions[action_name](current, data)
 
-    current = actions[action_name](current, data)
+    if g.system._supbot.action_complete_callback:
+        g.system._supbot.action_complete_callback(success, action_id, action)
+
     return current
 

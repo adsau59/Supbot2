@@ -4,10 +4,10 @@ api.py
 Helps creating interface layer for the library,
 abstracts the developer using supbot library from the underlying systems
 """
+import uuid
+from typing import Callable, Dict, Tuple
 
-from typing import Callable, Dict
-
-from supbot import g, system
+from supbot import g
 from supbot.action import ActionName
 from supbot.service_manager import Event
 from supbot.system import System
@@ -25,7 +25,9 @@ class Supbot:
 
     Uses `System` to start and stop the services to make it usable
     """
-    def __init__(self, message_received: Callable[[str, str], None] = None, **kwargs):
+    def __init__(self, message_received: Callable[[str, str], None] = None,
+                 action_complete_callback: Callable[[Tuple[bool, str, Tuple[ActionName, Tuple]]], None] = None,
+                 **kwargs):
         """
         Takes in event callbacks, initializes the `System` object
 
@@ -34,6 +36,7 @@ class Supbot:
         """
         g.kwargs = kwargs
         self.message_received = message_received
+        self.action_complete_callback = action_complete_callback
         self._system = System(self)
 
     @property
@@ -93,4 +96,7 @@ class Supbot:
         :param contact_name: name of the contact to send message
         :param message: message to send
         """
-        self._system.action_buffer.append((ActionName.SEND_MESSAGE, (contact_name, message)))
+        action = (ActionName.SEND_MESSAGE, (contact_name, message))
+        action_id = str(uuid.uuid4())
+        self._system.action_buffer[action_id] = action
+        return action_id

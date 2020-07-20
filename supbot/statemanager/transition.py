@@ -14,7 +14,7 @@ def goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResu
     :return:
     """
     # todo improve readability
-    
+
     result, new_current = goto_state(_current, search_state)
 
     if result == GotoStateResult.SUCCESS:

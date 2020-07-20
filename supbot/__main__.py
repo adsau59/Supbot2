@@ -78,7 +78,6 @@ def print_message(contact, message):
     """
     callback method for message received event
 
-    :param _: supbot object, not useful in this instance
     :param contact: name of the contact
     :param message: message string
     """

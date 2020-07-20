@@ -16,13 +16,11 @@ class ActionName(Enum):
     SEND_MESSAGE = 0
 
 
-def send_message(current: GUIState, data: Tuple) -> GUIState:
+def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
     """
     Sends message to the target contact
 
-    :param driver: AppDriver service
     :param current: Current GUI state
-    :param system: System services
     :param data: Data required to execute the service
     :return: resultant gui state after executing the action
     """
@@ -32,11 +30,11 @@ def send_message(current: GUIState, data: Tuple) -> GUIState:
 
     if result == GotoStateResult.SUCCESS and current.state == State.CHAT:
         g.driver.type_and_send(message)
-        g.system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
+        # g.system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
+        return True, current
     else:
-        g.system.logger.debug("Message failed")
-
-    return current
+        g.logger.warning("Failed to send message {} to {} successfully".format(message, chat_name))
+        return False, current
 
 
 """

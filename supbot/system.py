@@ -6,10 +6,9 @@ contains `System` class
 """
 
 import logging
-from typing import List
 import threading
 import typing
-from typing import Tuple
+from typing import Tuple, Dict
 from supbot import looper, g
 from supbot.action import ActionName
 from supbot.app_driver import AppDriver
@@ -18,7 +17,7 @@ from supbot.service_manager import Event
 if typing.TYPE_CHECKING:
     from supbot.api import Supbot
 
-ActionBuffer = List[Tuple[ActionName, Tuple]]
+ActionBuffer = Dict[str, Tuple[ActionName, Tuple]]
 
 
 # noinspection PyMethodMayBeStatic
@@ -52,9 +51,9 @@ class System:
         logging.getLogger().handlers = []
 
         g.logger = logging.getLogger("supbot")
-        FORMAT = "%(name)s - %(levelname)s - %(message)s"
+        format = "%(name)s - %(levelname)s - %(message)s"
         handler = PrintStreamHandler()
-        handler.setFormatter(logging.Formatter(fmt=FORMAT))
+        handler.setFormatter(logging.Formatter(fmt=format))
         g.logger.addHandler(handler)
 
         appium_logs = logging.getLogger('appium')
@@ -62,20 +61,11 @@ class System:
         appium_logs.addHandler(fh)
 
         self.status = 1
-        self._action_buffer: ActionBuffer = []
-        self._logger = g.logger
+        self._action_buffer: ActionBuffer = {}
         self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot
         g.system = self
         g.driver = AppDriver.create()
-
-    @property
-    def logger(self):
-        """
-        Provides logging services
-        :return: logger object
-        """
-        return self._logger
 
     @property
     def action_buffer(self) -> ActionBuffer:
