@@ -14,7 +14,7 @@ from typing import Tuple, Optional
 from appium.webdriver import Remote
 import time
 from selenium.common.exceptions import NoSuchElementException
-from supbot import model, g, helper
+from supbot import g, helper
 
 
 class AppDriver:
@@ -29,7 +29,6 @@ class AppDriver:
     def create() -> Optional['AppDriver']:
         """
         Initializes appium driver
-        :type device_name: name of the device to be used, if it is none, it uses adb command to fetch it
         """
         try:
             run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
@@ -46,6 +45,8 @@ class AppDriver:
                 adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
                 adb_ouput = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
                 device_name = re.search(r'^(.+)\tdevice', adb_ouput, flags=re.MULTILINE).group(1)
+            else:
+                device_name = g.kwargs["device_name"]
 
             if run_server:
                 def appium_logging():
@@ -65,11 +66,12 @@ class AppDriver:
 
             g.logger.info("Connecting to appium with {}".format(device_name))
             desired_caps = {
-                'platformName': 'Android',
-                'deviceName': device_name,
-                'appPackage': 'com.whatsapp',
-                'appActivity': 'com.whatsapp.HomeActivity',
-                'noReset': 'true'
+              "platformName": "Android",
+              "udid": device_name,
+              "appPackage": "com.whatsapp",
+              "appActivity": "com.whatsapp.HomeActivity",
+              "noReset": "true",
+              "deviceName": "Android Emulator"
             }
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
             driver.implicitly_wait(5)
@@ -97,12 +99,19 @@ class AppDriver:
         except Exception:
             return False
 
-    def search_chat(self, chat_name: str) -> bool:
+    def type_in_search(self, chat_name: str) -> bool:
         try:
-            self.driver.find_element_by_id("com.whatsapp:id/menuitem_search").click()
             self.driver.find_element_by_id("com.whatsapp:id/search_src_text").send_keys(chat_name)
             return True
         except NoSuchElementException:
+            return False
+
+    def click_search(self) -> bool:
+        try:
+            self.driver.find_element_by_id("com.whatsapp:id/menuitem_search").click()
+            self.press_back()
+            return True
+        except:
             return False
 
     def chat_via_intent(self, phone_number):
@@ -125,6 +134,7 @@ class AppDriver:
 
             element = self.driver.find_element_by_id('com.whatsapp:id/send')
             element.click()
+
             return True
         except NoSuchElementException:
             return False
@@ -148,7 +158,7 @@ class AppDriver:
         time.sleep(0.5)
         self.driver.press_keycode(4)
 
-    def get_new_chat(self) -> Optional['model.Chat']:
+    def get_new_chat(self) -> Optional[str]:
         """
         Checks for chat item with new message bubble,
         used by new_chat checker (checker system not made yet)
@@ -159,7 +169,7 @@ class AppDriver:
                                                         '"com.whatsapp:id/conversations_row_message_count"]/../..'
                                                         '//android.widget.TextView[@resource-id="com.whatsapp:id'
                                                         '/conversations_row_contact_name"]')
-            return model.Chat(element.text)
+            return element.text
         except NoSuchElementException:
             return None
 
@@ -191,5 +201,24 @@ class AppDriver:
             self.driver.find_element_by_xpath('//android.widget.ImageView').click()
             self.driver.find_element_by_id("com.whatsapp:id/send").click()
             return True
+        except:
+            return False
+
+    def check_search_button(self):
+        try:
+            return self.driver.find_element_by_id("com.whatsapp:id/menuitem_search") is not None
+        except:
+            return False
+
+    def check_search_input(self):
+        try:
+            return self.driver.find_element_by_id("com.whatsapp:id/search_src_text") is not None
+        except:
+            return False
+
+    def check_chat(self, chat_name):
+        try:
+            element = self.driver.find_element_by_id("com.whatsapp:id/conversation_contact_name")
+            return helper.contact_number_equal(element.text, chat_name)
         except:
             return False

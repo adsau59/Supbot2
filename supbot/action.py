@@ -3,18 +3,20 @@ action.py
 
 Contains all the actions available
 """
+from enum import Enum
+from typing import Tuple, Dict, Callable
 
-import typing
-from typing import Tuple, Dict
-from supbot import service_manager
-from supbot.model import State, ActionMeta, GUIState, ActionName
-from supbot.app_driver import AppDriver
-
-if typing.TYPE_CHECKING:
-    from supbot.api import System
+from supbot import g
+from supbot.results import GotoStateResult
+from supbot.statemanager.state import GUIState, ChatState, State
+from supbot.statemanager.transition import goto_state
 
 
-def send_message(driver: AppDriver, current: GUIState, system: 'System', data: Tuple) -> GUIState:
+class ActionName(Enum):
+    SEND_MESSAGE = 0
+
+
+def send_message(current: GUIState, data: Tuple) -> GUIState:
     """
     Sends message to the target contact
 
@@ -26,13 +28,13 @@ def send_message(driver: AppDriver, current: GUIState, system: 'System', data: T
     """
     chat_name, message = data
 
-    error, current = service_manager.change_state(system, driver, current, GUIState(State.CHAT, chat_name))
+    result, current = goto_state(current, ChatState(chat_name))
 
-    if not error and current.state == State.CHAT:
-        driver.type_and_send(message)
-        system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
+    if result == GotoStateResult.SUCCESS and current.state == State.CHAT:
+        g.driver.type_and_send(message)
+        g.system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
     else:
-        system.logger.debug("Message failed")
+        g.system.logger.debug("Message failed")
 
     return current
 
@@ -40,6 +42,6 @@ def send_message(driver: AppDriver, current: GUIState, system: 'System', data: T
 """
 Mapping action name to the action method and also the type of the data it takes in
 """
-actions: Dict[ActionName, ActionMeta] = {
-    ActionName.SEND_MESSAGE: ActionMeta(Tuple[str, str], send_message)
+actions: Dict[ActionName, Callable] = {
+    ActionName.SEND_MESSAGE: send_message
 }

@@ -8,7 +8,8 @@ abstracts the developer using supbot library from the underlying systems
 from typing import Callable, Dict
 
 from supbot import g, system
-from supbot.model import Action, ActionName, Event
+from supbot.action import ActionName
+from supbot.service_manager import Event
 from supbot.system import System
 
 
@@ -32,9 +33,8 @@ class Supbot:
         :param message_received: normal text message event callback
         """
         g.kwargs = kwargs
-        self._system = System(self)
-
         self.message_received = message_received
+        self._system = System(self)
 
     @property
     def events(self) -> Dict[Event, Callable]:
@@ -93,4 +93,4 @@ class Supbot:
         :param contact_name: name of the contact to send message
         :param message: message to send
         """
-        self._system.action_buffer.append(Action(ActionName.SEND_MESSAGE, (contact_name, message)))
+        self._system.action_buffer.append((ActionName.SEND_MESSAGE, (contact_name, message)))

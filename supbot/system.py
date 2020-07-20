@@ -6,14 +6,19 @@ contains `System` class
 """
 
 import logging
+from typing import List
 import threading
 import typing
 from typing import Tuple
 from supbot import looper, g
-from supbot.model import ActionBuffer, Event
+from supbot.action import ActionName
+from supbot.app_driver import AppDriver
+from supbot.service_manager import Event
 
 if typing.TYPE_CHECKING:
     from supbot.api import Supbot
+
+ActionBuffer = List[Tuple[ActionName, Tuple]]
 
 
 # noinspection PyMethodMayBeStatic
@@ -59,9 +64,10 @@ class System:
         self.status = 1
         self._action_buffer: ActionBuffer = []
         self._logger = g.logger
-        self._looper_thread = threading.Thread(target=looper.start, args=(self,))
+        self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot
         g.system = self
+        g.driver = AppDriver.create()
 
     @property
     def logger(self):

@@ -4,19 +4,13 @@ looper.py
 provides a function which is initializes and maintains state of supbot
 """
 
-from typing import Callable, List
-import typing
-from supbot import model, service_manager, g
-from supbot.model import State
-from supbot.app_driver import AppDriver
+from supbot import service_manager, g
+from supbot.statemanager.state import main_state
 
-if typing.TYPE_CHECKING:
-    from supbot.api import System
-
-_test_function: List[Callable[[AppDriver, model.GUIState], None]] = []
+# _test_function: List[Callable[[AppDriver, model.GUIState], None]] = []
 
 
-def start(system: 'System'):
+def start():
     """
     initializes services which is used internally in supbot
 
@@ -26,31 +20,26 @@ def start(system: 'System'):
     (for now its just `manager.check_for_new_chat` but it'll be reworked to support multiple checkers)
 
     maintains `gui_state` which represents the state in which the app currently is in
-
-    :param device_name: name of the device to be used
-    :param system: provides services and shared states which is used internally
     """
-    driver = AppDriver.create()
-
-    if driver is None:
-        system.logger.error("Driver couldn't be created successfully, maybe Appium is not running or your android "
+    if g.driver is None:
+        g.system.logger.error("Driver couldn't be created successfully, maybe Appium is not running or your android "
                             "device couldn't be found")
         return
 
-    gui_state = model.GUIState(State.MAIN)
+    gui_state = main_state
 
-    system.logger.info("Started")
-    system.status = 2
+    g.system.logger.info("Started")
+    g.system.status = 2
 
-    while system.is_on() or len(system.action_buffer) > 0:
+    while g.system.is_on() or len(g.system.action_buffer) > 0:
 
-        if len(system.action_buffer) == 0:
-            gui_state = service_manager.check_for_new_chat(system, driver, gui_state)
+        if len(g.system.action_buffer) == 0:
+            gui_state = service_manager.check_for_new_chat(gui_state)
         else:
-            gui_state = service_manager.execute_action(system, driver, gui_state)
+            gui_state = service_manager.execute_action(gui_state)
 
-        if _test_function:
-            _test_function.pop(0)(driver, gui_state)
+        # if _test_function:
+        #     _test_function.pop(0)(driver, gui_state)
 
-    driver.destroy()
-    system.status = -1
+    g.driver.destroy()
+    g.system.status = -1
