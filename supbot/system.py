@@ -57,7 +57,7 @@ class System:
         g.logger.addHandler(handler)
 
         appium_logs = logging.getLogger('appium')
-        fh = logging.FileHandler('appium.log')
+        fh = logging.FileHandler('appium.log', encoding='utf-8')
         appium_logs.addHandler(fh)
 
         self.status = 1

@@ -3,21 +3,27 @@ Simple example which resends messages sent to the bot
 """
 
 from supbot import Supbot
+from supbot.action import ActionName
 
 
 def action_complete_callback(success, action_id, action):
+    """
+    called when action is completed
+    :param success: if the action was successfully called or not
+    :param action_id: id of the action
+    :param action: name and data of the action
+    """
     action_name, data = action
 
-    msg = "successful" if success else "unsuccess"
-    print(f"action {action_id} was {msg}")
+    if action_id == ActionName.SEND_MESSAGE:
+        contact, message = data
+        success_msg = "successful" if success else "unsuccessful"
+        print(f"action {action_id}, sending '{message}' to {contact} was {success_msg}")
 
 
 def repeat_message(contact_name, message):
     """
-    Supbot callbacks returns a reference for supbot's interface too
-    :param contact_name:
-    :param message:
-    :return:
+    sends back the message received
     """
     action_id = supbot.send_message(contact_name, message)
     print(f"sent action request: {action_id}")
