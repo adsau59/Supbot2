@@ -30,10 +30,9 @@ def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
 
     if result == GotoStateResult.SUCCESS and current.state == State.CHAT:
         g.driver.type_and_send(message)
-        # g.system.logger.debug("sent message {} to {} successfully".format(message, chat_name))
         return True, current
     else:
-        g.logger.warning("Failed to send message {} to {} successfully".format(message, chat_name))
+        g.logger.warning("Failed to send message to {}".format(message, chat_name))
         return False, current
 
 

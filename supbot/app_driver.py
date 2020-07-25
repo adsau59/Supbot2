@@ -116,14 +116,8 @@ class AppDriver:
         except:
             return False
 
-    def chat_via_intent(self, phone_number):
-        try:
-            self.driver.start_activity("com.whatsapp", "com.whatsapp.Conversation",
-                                       intent_action="android.intent.action.SENDTO smsto:{}".format(phone_number))
-            return True
-        except:
-            self.driver.start_activity("com.whatsapp", "com.whatsapp.HomeActivity")
-            return False
+    def goto_home(self):
+        self.driver.start_activity("com.whatsapp", "com.whatsapp.HomeActivity")
 
     def type_and_send(self, message: str):
         """

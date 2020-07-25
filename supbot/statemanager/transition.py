@@ -2,8 +2,9 @@ import re
 from typing import Tuple, cast
 
 from supbot import g
+from supbot.app_driver import AppDriver
 from supbot.results import GotoStateResult
-from supbot.statemanager.state import GUIState, State, ChatState, search_state, temp_group
+from supbot.statemanager.state import GUIState, State, ChatState, search_state, temp_group, main_state
 
 
 def goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIState]:
@@ -47,6 +48,10 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
     if _current == _to:
         return GotoStateResult.SUCCESS, _to
 
+    if not _current.check():
+        _check_failed()
+        return GotoStateResult.CHECK_FAILED, main_state
+
     result, new_current = _current.to(_to)
 
     if result == GotoStateResult.SUCCESS:
@@ -65,7 +70,7 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
             return goto_state(new_current, _to)
 
         else:
-            return goto_state(_current, _to)
+            return goto_state(new_current, _to)
     elif result == GotoStateResult.ELEMENT_NOT_FOUND:
         """
         The step was unsuccessful,
@@ -77,6 +82,14 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
             return GotoStateResult.ELEMENT_NOT_FOUND, _current
 
     if result == GotoStateResult.CHECK_FAILED:
-        g.logger.error("UI desynced run the script again...")
+        _check_failed()
+        return result, main_state
 
     return result, _current
+
+
+def _check_failed():
+    for _ in range(3):
+        g.logger.error("UI DESYNCED :( THIS SHOULD NOT HAPPEN, CONTACT THE DEV IF ITS REPRODUCIBLE")
+    g.logger.info("restarting whatsapp")
+    g.driver.goto_home()
