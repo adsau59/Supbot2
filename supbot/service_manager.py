@@ -10,6 +10,7 @@ from enum import Enum
 
 from supbot import g
 from supbot.action import actions
+from supbot.results import ActionStatus
 from supbot.statemanager.state import main_state, GUIState, ChatState
 from supbot.statemanager.transition import goto_state
 
@@ -50,12 +51,14 @@ def execute_action(current: GUIState) -> GUIState:
     except IndexError:
         return current
 
-    action_name, data = action
+    print("running action")
 
-    success, current = actions[action_name](current, data)
+    success, current = actions[action.action_name](current, action.data)
 
-    if g.system._supbot.action_complete_callback:
-        g.system._supbot.action_complete_callback(success, action_id, action)
+    action.status = ActionStatus.SUCCESS if success else ActionStatus.UNSUCCESS
+
+    if action.callback:
+        action.callback(action_id)
 
     return current
 

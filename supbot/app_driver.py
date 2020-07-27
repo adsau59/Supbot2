@@ -132,7 +132,7 @@ class AppDriver:
             element.click()
 
             return True
-        except NoSuchElementException:
+        except:
             return False
 
     def click_on_last_chat_link(self):

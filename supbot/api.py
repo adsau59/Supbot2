@@ -4,11 +4,13 @@ api.py
 Helps creating interface layer for the library,
 abstracts the developer using supbot library from the underlying systems
 """
+import time
 import uuid
 from typing import Callable, Dict, Tuple
 
 from supbot import g
-from supbot.action import ActionName
+from supbot.action import ActionName, Action, ActionCallback
+from supbot.results import ActionStatus
 from supbot.service_manager import Event
 from supbot.system import System
 
@@ -26,7 +28,6 @@ class Supbot:
     Uses `System` to start and stop the services to make it usable
     """
     def __init__(self, message_received: Callable[[str, str], None] = None,
-                 action_complete_callback: Callable[[Tuple[bool, str, Tuple[ActionName, Tuple]]], None] = None,
                  **kwargs):
         """
         Takes in event callbacks, initializes the `System` object
@@ -36,7 +37,6 @@ class Supbot:
         """
         g.kwargs = kwargs
         self.message_received = message_received
-        self.action_complete_callback = action_complete_callback
         self._system = System(self)
 
     @property
@@ -88,15 +88,28 @@ class Supbot:
     def has_started(self) -> bool:
         return self._system.has_started()
 
-    def send_message(self, contact_name: str, message: str):
+    def get_action(self, action_id):
+        return self._system._action_achieve[action_id]
+
+    def wait_for_action(self, action_id)-> bool:
+        while self._system._action_achieve[action_id].status == ActionStatus.WAITING:
+            time.sleep(.1)
+        return self._system._action_achieve[action_id].status == ActionStatus.SUCCESS
+
+    def send_message(self, contact_name: str, message: str,
+                     action_complete_callback: ActionCallback = None):
         """
         Send Message action
         sends message to the contact
 
+        :param action_complete_callback:
         :param contact_name: name of the contact to send message
         :param message: message to send
         """
-        action = (ActionName.SEND_MESSAGE, (contact_name, message))
+        # todo move this into system
         action_id = str(uuid.uuid4())
+        action = Action(action_id, ActionName.SEND_MESSAGE, action_complete_callback, ActionStatus.WAITING,
+                        (contact_name, message))
         self._system.action_buffer[action_id] = action
+        self._system._action_achieve[action_id] = action
         return action_id

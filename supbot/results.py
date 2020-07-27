@@ -17,3 +17,9 @@ class GotoStateResult(Enum):
     When check fails
     """
     CHECK_FAILED = 2
+
+
+class ActionStatus(Enum):
+    WAITING = 0,
+    SUCCESS = 1,
+    UNSUCCESS = 2

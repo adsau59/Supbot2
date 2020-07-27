@@ -3,17 +3,33 @@ action.py
 
 Contains all the actions available
 """
+from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple, Dict, Callable
 
 from supbot import g
-from supbot.results import GotoStateResult
+from supbot.results import GotoStateResult, ActionStatus
 from supbot.statemanager.state import GUIState, ChatState, State
 from supbot.statemanager.transition import goto_state
+
+ActionCallback = Callable[[str], None]
 
 
 class ActionName(Enum):
     SEND_MESSAGE = 0
+
+
+@dataclass
+class Action:
+    action_id: str
+    action_name: ActionName
+    callback: ActionCallback
+    status: ActionStatus
+    data: Tuple
+
+    @property
+    def success(self):
+        return self.status == ActionStatus.SUCCESS
 
 
 def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
@@ -28,11 +44,10 @@ def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
 
     result, current = goto_state(current, ChatState(chat_name))
 
-    if result == GotoStateResult.SUCCESS and current.state == State.CHAT:
-        g.driver.type_and_send(message)
+    if result == GotoStateResult.SUCCESS and current.state == State.CHAT and g.driver.type_and_send(message):
         return True, current
     else:
-        g.logger.warning("Failed to send message to {}".format(message, chat_name))
+        g.logger.warning("Failed to send message to {}".format(chat_name))
         return False, current
 
 

@@ -2,7 +2,6 @@ import re
 from typing import Tuple, cast
 
 from supbot import g
-from supbot.app_driver import AppDriver
 from supbot.results import GotoStateResult
 from supbot.statemanager.state import GUIState, State, ChatState, search_state, temp_group, main_state
 

@@ -8,16 +8,16 @@ contains `System` class
 import logging
 import threading
 import typing
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Callable
 from supbot import looper, g
-from supbot.action import ActionName
+from supbot.action import Action
 from supbot.app_driver import AppDriver
 from supbot.service_manager import Event
 
 if typing.TYPE_CHECKING:
     from supbot.api import Supbot
 
-ActionBuffer = Dict[str, Tuple[ActionName, Tuple]]
+ActionBuffer = Dict[str, Action]
 
 
 # noinspection PyMethodMayBeStatic
@@ -62,6 +62,7 @@ class System:
 
         self.status = 1
         self._action_buffer: ActionBuffer = {}
+        self._action_achieve: ActionBuffer = {}
         self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot
         g.system = self
@@ -106,7 +107,7 @@ class System:
         """
         callback = self._supbot.events[event]
         if callback is not None:
-            callback(*params)
+            threading.Thread(target=callback, args=params).start()
 
     def is_on(self) -> bool:
         """
