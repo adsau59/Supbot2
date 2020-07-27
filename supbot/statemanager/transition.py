@@ -37,16 +37,26 @@ def goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResu
 
 
 def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIState]:
+    if _current == _to:
+        return GotoStateResult.SUCCESS, _to
+
+    result, new_current = _step_to_state(_current, _to)
+
+    if result == GotoStateResult.CHECK_FAILED:
+        g.logger.error("Desynced trying to go from {} to {}".format(_current.state, _to.state))
+
+    return result, new_current
+
+
+def _step_to_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIState]:
     """
     When called, this function will make sure that the gui reaches the target state;
     if it could, it'll return the error code
+    recursively calls itself until target state has been reached
     :param _current:
     :param _to:
     :return:
     """
-    if _current == _to:
-        return GotoStateResult.SUCCESS, _to
-
     if not _current.check():
         _check_failed()
         return GotoStateResult.CHECK_FAILED, main_state
@@ -66,10 +76,10 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
             if cast(ChatState, new_current).contact and cast(ChatState, _to).contact:
                 return result.SUCCESS, _to
 
-            return goto_state(new_current, _to)
+            return _step_to_state(new_current, _to)
 
         else:
-            return goto_state(new_current, _to)
+            return _step_to_state(new_current, _to)
     elif result == GotoStateResult.ELEMENT_NOT_FOUND:
         """
         The step was unsuccessful,
@@ -88,7 +98,6 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
 
 
 def _check_failed():
-    for _ in range(3):
-        g.logger.error("UI DESYNCED :( THIS SHOULD NOT HAPPEN, CONTACT THE DEV IF ITS REPRODUCIBLE")
+    g.logger.error("UI DESYNCED :( THIS SHOULD NOT HAPPEN, CONTACT THE DEV IF ITS REPRODUCIBLE")
     g.logger.info("restarting whatsapp")
     g.driver.goto_home()

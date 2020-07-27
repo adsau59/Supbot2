@@ -23,8 +23,9 @@ class AppDriver:
     Abstracts appium calls
     """
 
-    def __init__(self, driver: Remote):
+    def __init__(self, driver: Remote, implicit_wait: int):
         self.driver = driver
+        self.implicit_wait = implicit_wait
 
     @staticmethod
     def create() -> Optional['AppDriver']:
@@ -32,6 +33,7 @@ class AppDriver:
         Initializes appium driver
         """
         try:
+            # region input from kwargs
             run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
 
             if "port" in g.kwargs and g.kwargs["port"] is not None:
@@ -42,12 +44,22 @@ class AppDriver:
                 port = "4723"
 
             g.logger.info("Finding android device")
-            if "device_name" not in g.kwargs or g.kwargs["device_name"] is None:
-                adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
-                adb_ouput = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
-                device_name = re.search(r'^(.+)\tdevice', adb_ouput, flags=re.MULTILINE).group(1)
-            else:
+
+            if "device_name" in g.kwargs and g.kwargs["device_name"] is not None:
                 device_name = g.kwargs["device_name"]
+            elif "device" in g.kwargs and g.kwargs["device"] is not None:
+                device_name = g.kwargs["device"]
+            else:
+                adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
+                ada_output = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
+                device_name = re.search(r'^(.+)\tdevice', ada_output, flags=re.MULTILINE).group(1)
+
+            if "implicit_wait" in g.kwargs and g.kwargs["implicit_wait"] is not None:
+                implicit_wait = g.kwargs["implicit_wait"]
+            else:
+                implicit_wait = 5
+
+            # endregion
 
             if run_server:
                 def appium_logging():
@@ -76,9 +88,9 @@ class AppDriver:
               "deviceName": "Android Emulator"
             }
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
-            driver.implicitly_wait(5)
+            driver.implicitly_wait(implicit_wait)
             g.logger.info("driver created")
-            return AppDriver(driver)
+            return AppDriver(driver, implicit_wait)
         except FileNotFoundError:
             logging.error("Device not found; make sure device is connected using `adb devices` command")
 
@@ -144,7 +156,7 @@ class AppDriver:
             ok = self.driver.find_element_by_id("android:id/button1")
             ok.click()
             return True
-        except  NoSuchElementException:
+        except NoSuchElementException:
             return False
 
     def press_back(self):
@@ -161,6 +173,7 @@ class AppDriver:
         :return: chat (contact_name) who sent a new chat
         """
         try:
+            self.driver.implicitly_wait(1)
             element = self.driver.find_element_by_xpath('//android.widget.TextView[@resource-id='
                                                         '"com.whatsapp:id/conversations_row_message_count"]/../..'
                                                         '//android.widget.TextView[@resource-id="com.whatsapp:id'
@@ -168,6 +181,8 @@ class AppDriver:
             return element.text
         except NoSuchElementException:
             return None
+        finally:
+            self.driver.implicitly_wait(self.implicit_wait)
 
     def get_new_messages(self) -> Optional[Tuple[str]]:
         """

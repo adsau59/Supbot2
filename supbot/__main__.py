@@ -2,17 +2,18 @@
 supbot
 
 Usage:
-  supbot [--device=<str>] [--no-server] [--port=<int>] [--no-prompt]
+  supbot [--device=<str>] [--no-server] [--port=<int>] [--no-prompt] [--implicit-wait=<int>]
   supbot -h | --help
   supbot -v | --version
 
 Options:
-  -h --help         Show this screen.
-  -v --version      Show version.
-  --device=<str>    Device name
-  --no-server       Doesn't run appium server
-  --port=<int>      Port number to use to create/connect appium server
-  --no-prompt       Don't use interactive console
+  -h --help                 Show this screen.
+  -v --version              Show version.
+  --device=<str>            Device name
+  --no-server               Doesn't run appium server
+  --port=<int>              Port number to use to create/connect appium server
+  --no-prompt               Don't use interactive console
+  --implicit-wait=<int>     Increase this for slower devices, default: 5
 
 """
 import re
@@ -101,8 +102,11 @@ def main():
 
     print("Loading...")
 
-    with Supbot(message_received=print_message, no_server=args["--no-server"],
-                port=args["--port"], device_name=args["--device"]) as supbot:
+    kwargs = {}
+    for k, v in args.items():
+        kwargs[k.strip("-").replace("-", "_")] = v
+
+    with Supbot(message_received=print_message, **kwargs) as supbot:
         start_loop(supbot, args["--no-prompt"])
 
 

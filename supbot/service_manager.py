@@ -10,7 +10,7 @@ from enum import Enum
 
 from supbot import g
 from supbot.action import actions
-from supbot.results import ActionStatus
+from supbot.results import ActionStatus, GotoStateResult
 from supbot.statemanager.state import main_state, GUIState, ChatState
 from supbot.statemanager.transition import goto_state
 
@@ -31,11 +31,12 @@ def check_for_new_chat(current: GUIState) -> GUIState:
     _, current = goto_state(current, main_state)
     chat = g.driver.get_new_chat()
     if chat is not None:
-        _, current = goto_state(current, ChatState(chat))
-        messages = g.driver.get_new_messages()
+        result, current = goto_state(current, ChatState(chat))
 
-        for m in messages:
-            g.system.call_event(Event.MESSAGE_RECEIVED, (chat, m))
+        if result == GotoStateResult.SUCCESS:
+            messages = g.driver.get_new_messages()
+            for m in messages:
+                g.system.call_event(Event.MESSAGE_RECEIVED, (chat, m))
     return current
 
 
@@ -50,8 +51,6 @@ def execute_action(current: GUIState) -> GUIState:
         action_id, action = g.system.action_buffer.popitem()
     except IndexError:
         return current
-
-    print("running action")
 
     success, current = actions[action.action_name](current, action.data)
 
