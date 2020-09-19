@@ -6,7 +6,7 @@ abstracts the developer using supbot library from the underlying systems
 """
 import time
 import uuid
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict
 
 from supbot import g
 from supbot.action import ActionName, Action, ActionCallback
@@ -89,12 +89,12 @@ class Supbot:
         return self._system.has_started()
 
     def get_action(self, action_id):
-        return self._system._action_achieve[action_id]
+        return self._system.action_achieve[action_id]
 
-    def wait_for_action(self, action_id)-> bool:
-        while self._system._action_achieve[action_id].status == ActionStatus.WAITING:
+    def wait_for_action(self, action_id) -> bool:
+        while self._system.action_achieve[action_id].status == ActionStatus.WAITING:
             time.sleep(.1)
-        return self._system._action_achieve[action_id].status == ActionStatus.SUCCESS
+        return self._system.action_achieve[action_id].status == ActionStatus.SUCCESS
 
     def send_message(self, contact_name: str, message: str,
                      action_complete_callback: ActionCallback = None):
@@ -111,5 +111,5 @@ class Supbot:
         action = Action(action_id, ActionName.SEND_MESSAGE, action_complete_callback, ActionStatus.WAITING,
                         (contact_name, message))
         self._system.action_buffer[action_id] = action
-        self._system._action_achieve[action_id] = action
+        self._system.action_achieve[action_id] = action
         return action_id

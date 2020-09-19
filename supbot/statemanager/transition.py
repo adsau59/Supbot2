@@ -28,7 +28,7 @@ def goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResu
 
             if result == GotoStateResult.SUCCESS:
                 contact = cast(ChatState, _to).contact
-                if re.search("\d{11,13}", contact):
+                if re.search("\d{11, 3}", contact):
                     if g.driver.type_and_send(f"wa.me/{contact}") and g.driver.click_on_last_chat_link():
                         if not g.driver.click_ok():
                             return GotoStateResult.SUCCESS, _to

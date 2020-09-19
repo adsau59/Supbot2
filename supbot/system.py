@@ -8,7 +8,7 @@ contains `System` class
 import logging
 import threading
 import typing
-from typing import Tuple, Dict, Callable
+from typing import Tuple, Dict
 from supbot import looper, g
 from supbot.action import Action
 from supbot.app_driver import AppDriver
@@ -51,9 +51,9 @@ class System:
         logging.getLogger().handlers = []
 
         g.logger = logging.getLogger("supbot")
-        format = "%(name)s - %(levelname)s - %(message)s"
+        log_format = "%(name)s - %(levelname)s - %(message)s"
         handler = PrintStreamHandler()
-        handler.setFormatter(logging.Formatter(fmt=format))
+        handler.setFormatter(logging.Formatter(fmt=log_format))
         g.logger.addHandler(handler)
 
         appium_logs = logging.getLogger('appium')
@@ -62,7 +62,7 @@ class System:
 
         self.status = 1
         self._action_buffer: ActionBuffer = {}
-        self._action_achieve: ActionBuffer = {}
+        self.action_achieve: ActionBuffer = {}
         self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot
         g.system = self

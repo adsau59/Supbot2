@@ -125,7 +125,7 @@ class AppDriver:
         try:
             self.driver.find_element_by_id("com.whatsapp:id/menuitem_search").click()
             return True
-        except:
+        except Exception:
             return False
 
     def goto_home(self):
@@ -144,7 +144,7 @@ class AppDriver:
             element.click()
 
             return True
-        except:
+        except Exception:
             return False
 
     def click_on_last_chat_link(self):
@@ -170,14 +170,14 @@ class AppDriver:
         try:
             self.driver.find_element_by_id("com.whatsapp:id/back").click()
             return True
-        except:
+        except Exception:
             return False
 
     def press_search_back(self):
         try:
             self.driver.find_element_by_id("com.whatsapp:id/search_back").click()
             return True
-        except:
+        except Exception:
             return False
 
     def get_new_chat(self) -> Optional[str]:
@@ -211,21 +211,12 @@ class AppDriver:
                                                              '//android.widget.LinearLayout[@resource-id='
                                                              '"com.whatsapp:id/main_layout"]')
 
-            messages: Tuple[str] = tuple(self.get_message_from_bubble(x) for x in new_bubbles)
+            messages: Tuple[str] = tuple(Bubble(x).get_message() for x in new_bubbles)
             return messages
         except NoSuchElementException:
             return None
         finally:
             self.driver.implicitly_wait(self.implicit_wait)
-
-    def get_message_from_bubble(self, bubble: WebElement) -> str:
-        try:
-            return bubble.find_element_by_id("com.whatsapp:id/message_text").text
-        except:
-            return ""
-
-    def get_author_from_bubble(self, bubbles, target_bubble) -> str:
-        ...
 
     def does_any_has_author(self, bubbles) -> bool:
         ...
@@ -242,7 +233,7 @@ class AppDriver:
             self.driver.find_element_by_xpath('//android.widget.ImageView').click()
             self.driver.find_element_by_id("com.whatsapp:id/send").click()
             return True
-        except:
+        except Exception:
             return False
 
     def scroll_chat(self, reverse=False):
@@ -253,16 +244,16 @@ class AppDriver:
             else:
                 self.driver.scroll(elements[-1], elements[1], 3000)
             return True
-        except:
+        except Exception:
             return False
 
-    def check(self, id, fast: bool=False):
+    def check(self, _id, fast: bool = False):
         try:
             if fast:
                 self.driver.implicitly_wait(1)
 
-            return self.driver.find_element_by_id(id) is not None
-        except:
+            return self.driver.find_element_by_id(_id) is not None
+        except Exception:
             return False
         finally:
             self.driver.implicitly_wait(self.implicit_wait)
@@ -277,7 +268,7 @@ class AppDriver:
             search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
             element = next(x for x in search if helper.contact_number_equal(x.text, "!temp"))
             return element is not None
-        except:
+        except Exception:
             return False
         finally:
             self.driver.implicitly_wait(self.implicit_wait)
@@ -288,18 +279,34 @@ class AppDriver:
     def check_fab(self):
         try:
             return self.driver.find_element_by_id("com.whatsapp:id/fab") is not None
-        except:
+        except Exception:
             return False
 
     def check_search_input(self):
         try:
             return self.driver.find_element_by_id("com.whatsapp:id/search_src_text") is not None
-        except:
+        except Exception:
             return False
 
     def check_chat(self, chat_name):
         try:
             element = self.driver.find_element_by_id("com.whatsapp:id/conversation_contact_name")
             return helper.contact_number_equal(element.text, chat_name)
-        except:
+        except Exception:
             return False
+
+
+# noinspection PyBroadException
+class Bubble:
+    def __init__(self, web_element: WebElement):
+        self.bubble = web_element
+
+    def get_message(self) -> str:
+        try:
+            return self.bubble.find_element_by_id("com.whatsapp:id/message_text").text
+        except Exception:
+            return ""
+
+    def get_author_from_bubble(self, bubbles) -> str:
+        ...
+
