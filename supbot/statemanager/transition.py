@@ -37,9 +37,6 @@ def goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResu
 
 
 def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIState]:
-    if _current == _to:
-        return GotoStateResult.SUCCESS, _to
-
     result, new_current = _step_to_state(_current, _to)
 
     if result == GotoStateResult.CHECK_FAILED:

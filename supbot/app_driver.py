@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import threading
 from typing import Tuple, Optional
+from appium.webdriver.webelement import WebElement
 from appium.webdriver import Remote
 import time
 from selenium.common.exceptions import NoSuchElementException
@@ -80,12 +81,12 @@ class AppDriver:
 
             g.logger.info("Connecting to appium with {}".format(device_name))
             desired_caps = {
-              "platformName": "Android",
-              "udid": device_name,
-              "appPackage": "com.whatsapp",
-              "appActivity": "com.whatsapp.HomeActivity",
-              "noReset": "true",
-              "deviceName": "Android Emulator"
+                "platformName": "Android",
+                "udid": device_name,
+                "appPackage": "com.whatsapp",
+                "appActivity": "com.whatsapp.HomeActivity",
+                "noReset": "true",
+                "deviceName": "Android Emulator"
             }
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
             driver.implicitly_wait(implicit_wait)
@@ -123,7 +124,6 @@ class AppDriver:
     def click_search(self) -> bool:
         try:
             self.driver.find_element_by_id("com.whatsapp:id/menuitem_search").click()
-            self.press_back()
             return True
         except:
             return False
@@ -166,6 +166,20 @@ class AppDriver:
         time.sleep(0.5)
         self.driver.press_keycode(4)
 
+    def press_chat_back(self):
+        try:
+            self.driver.find_element_by_id("com.whatsapp:id/back").click()
+            return True
+        except:
+            return False
+
+    def press_search_back(self):
+        try:
+            self.driver.find_element_by_id("com.whatsapp:id/search_back").click()
+            return True
+        except:
+            return False
+
     def get_new_chat(self) -> Optional[str]:
         """
         Checks for chat item with new message bubble,
@@ -190,15 +204,31 @@ class AppDriver:
         :return: list of messages sent to the bot
         """
         try:
-            message_elements = self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
-                                                                  '"com.whatsapp:id/unread_divider_tv"]/../..'
-                                                                  '//following-sibling::android.view.ViewGroup'
-                                                                  '//android.widget.TextView[@resource-id='
-                                                                  '"com.whatsapp:id/message_text"]')
-            messages: Tuple[str] = tuple(x.text for x in message_elements)
+            self.driver.implicitly_wait(1)
+            new_bubbles = self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
+                                                             '"com.whatsapp:id/unread_divider_tv"]/../..'
+                                                             '//following-sibling::android.view.ViewGroup'
+                                                             '//android.widget.LinearLayout[@resource-id='
+                                                             '"com.whatsapp:id/main_layout"]')
+
+            messages: Tuple[str] = tuple(self.get_message_from_bubble(x) for x in new_bubbles)
             return messages
         except NoSuchElementException:
             return None
+        finally:
+            self.driver.implicitly_wait(self.implicit_wait)
+
+    def get_message_from_bubble(self, bubble: WebElement) -> str:
+        try:
+            return bubble.find_element_by_id("com.whatsapp:id/message_text").text
+        except:
+            return ""
+
+    def get_author_from_bubble(self, bubbles, target_bubble) -> str:
+        ...
+
+    def does_any_has_author(self, bubbles) -> bool:
+        ...
 
     def send_image(self, image_loc: str) -> bool:
         try:
@@ -215,9 +245,49 @@ class AppDriver:
         except:
             return False
 
-    def check_search_button(self):
+    def scroll_chat(self, reverse=False):
         try:
-            return self.driver.find_element_by_id("com.whatsapp:id/menuitem_search") is not None
+            elements = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+            if reverse:
+                self.driver.scroll(elements[1], elements[-1], 3000)
+            else:
+                self.driver.scroll(elements[-1], elements[1], 3000)
+            return True
+        except:
+            return False
+
+    def check(self, id, fast: bool=False):
+        try:
+            if fast:
+                self.driver.implicitly_wait(1)
+
+            return self.driver.find_element_by_id(id) is not None
+        except:
+            return False
+        finally:
+            self.driver.implicitly_wait(self.implicit_wait)
+
+    # todo make better architecture for check
+    def check_scroll_end(self):
+        return self.check("com.whatsapp:id/conversations_row_tip_tv", True)
+
+    def check_scroll_top(self):
+        try:
+            self.driver.implicitly_wait(1)
+            search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+            element = next(x for x in search if helper.contact_number_equal(x.text, "!temp"))
+            return element is not None
+        except:
+            return False
+        finally:
+            self.driver.implicitly_wait(self.implicit_wait)
+
+    def check_for_below_chat(self):
+        return self.check("com.whatsapp:id/badge", True)
+
+    def check_fab(self):
+        try:
+            return self.driver.find_element_by_id("com.whatsapp:id/fab") is not None
         except:
             return False
 

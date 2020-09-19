@@ -52,13 +52,26 @@ class GUIState(ABC):
 class MainState(GUIState):
     def __init__(self):
         super().__init__(State.MAIN)
+        self.scrolling = False
+
+    def scroll_to_top(self):
+        while not g.driver.check_scroll_top():
+            g.driver.scroll_chat(reverse=True)
+        self.scrolling = False
+
+    def scroll_down(self):
+        self.scrolling = True
+        g.driver.scroll_chat()
 
     def check(self):
-        return g.driver.check_search_button()
+        return g.driver.check_fab()
 
     def _to_state(self, target: 'GUIState') -> Tuple[GotoStateResult, 'GUIState']:
 
         if target.state == State.MAIN:
+            if self.scrolling:
+                self.scroll_to_top()
+
             return GotoStateResult.SUCCESS, target
 
         elif target.state == State.SEARCH:
@@ -82,7 +95,7 @@ class SearchState(GUIState):
     def _to_state(self, target: 'GUIState') -> Tuple[GotoStateResult, 'GUIState']:
 
         if target.state == State.MAIN:
-            g.driver.press_back()
+            g.driver.press_search_back()
             return GotoStateResult.SUCCESS, target
 
         elif target.state == State.SEARCH:
@@ -106,18 +119,18 @@ class ChatState(GUIState):
 
     def _to_state(self, target: 'GUIState') -> Tuple[GotoStateResult, 'GUIState']:
         if target.state == State.MAIN:
-            g.driver.press_back()
+            g.driver.press_chat_back()
             return GotoStateResult.SUCCESS, target
 
         elif target.state == State.SEARCH:
-            g.driver.press_back()
+            g.driver.press_search_back()
             return GotoStateResult.SUCCESS, main_state
 
         elif target.state == State.CHAT:
             if cast(ChatState, target).contact == self.contact:
                 return GotoStateResult.SUCCESS, self
             else:
-                g.driver.press_back()
+                g.driver.press_chat_back()
                 return GotoStateResult.SUCCESS, main_state
 
 
