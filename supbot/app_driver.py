@@ -89,7 +89,7 @@ class AppDriver:
                 "deviceName": "Android Emulator"
             }
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
-            driver.implicitly_wait(implicit_wait)
+            driver.implicitly_wait(1)
             g.logger.info("driver created")
             return AppDriver(driver, implicit_wait)
         except FileNotFoundError:
@@ -204,7 +204,6 @@ class AppDriver:
         :return: list of messages sent to the bot
         """
         try:
-            self.driver.implicitly_wait(1)
             new_bubbles = self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
                                                              '"com.whatsapp:id/unread_divider_tv"]/../..'
                                                              '//following-sibling::android.view.ViewGroup'
@@ -215,8 +214,6 @@ class AppDriver:
             return messages
         except NoSuchElementException:
             return None
-        finally:
-            self.driver.implicitly_wait(self.implicit_wait)
 
     def does_any_has_author(self, bubbles) -> bool:
         ...
@@ -247,53 +244,48 @@ class AppDriver:
         except Exception:
             return False
 
-    def check(self, _id, fast: bool = False):
+    def check(self, _id, slow: bool = False):
+        """
+        checks if an element is on screen
+        :param _id: id of the element
+        :param slow: set to true if used for state.check methods
+        :return: True if element exists
+        """
         try:
-            if fast:
-                self.driver.implicitly_wait(1)
+            if slow:
+                self.driver.implicitly_wait(self.implicit_wait)
 
             return self.driver.find_element_by_id(_id) is not None
         except Exception:
             return False
         finally:
-            self.driver.implicitly_wait(self.implicit_wait)
+            if slow:
+                self.driver.implicitly_wait(1)
 
     # todo make better architecture for check
     def check_scroll_end(self):
-        return self.check("com.whatsapp:id/conversations_row_tip_tv", True)
+        return self.check("com.whatsapp:id/conversations_row_tip_tv")
 
     def check_scroll_top(self):
+        """On top check is done by temp group pined on top"""
         try:
-            self.driver.implicitly_wait(1)
             search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
             element = next(x for x in search if helper.contact_number_equal(x.text, "!temp"))
             return element is not None
         except Exception:
             return False
-        finally:
-            self.driver.implicitly_wait(self.implicit_wait)
 
     def check_for_below_chat(self):
-        return self.check("com.whatsapp:id/badge", True)
+        return self.check("com.whatsapp:id/badge")
 
     def check_fab(self):
-        try:
-            return self.driver.find_element_by_id("com.whatsapp:id/fab") is not None
-        except Exception:
-            return False
+        return self.check("com.whatsapp:id/fab", True)
 
     def check_search_input(self):
-        try:
-            return self.driver.find_element_by_id("com.whatsapp:id/search_src_text") is not None
-        except Exception:
-            return False
+        return self.check("com.whatsapp:id/search_src_text", True)
 
     def check_chat(self, chat_name):
-        try:
-            element = self.driver.find_element_by_id("com.whatsapp:id/conversation_contact_name")
-            return helper.contact_number_equal(element.text, chat_name)
-        except Exception:
-            return False
+        return self.check("com.whatsapp:id/conversation_contact_name", True)
 
 
 # noinspection PyBroadException
