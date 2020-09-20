@@ -14,11 +14,12 @@ from typing import Tuple, Optional, List
 from appium.webdriver.webelement import WebElement
 from appium.webdriver import Remote
 import time
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from supbot import g, helper
-
-
 # noinspection PyBroadException
+from supbot.exceptions import DeviceNotFound
+
+
 class AppDriver:
     """
     Abstracts appium calls
@@ -30,70 +31,97 @@ class AppDriver:
 
     @staticmethod
     def create() -> Optional['AppDriver']:
+        global appium_process
         """
         Initializes appium driver
         """
-        try:
-            # region input from kwargs
-            run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
+        # region input from kwargs
+        run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
 
-            if "port" in g.kwargs and g.kwargs["port"] is not None:
-                port = g.kwargs["port"]
-            elif run_server:
-                port = str(helper.get_free_tcp_port())
-            else:
-                port = "4723"
+        if "port" in g.kwargs and g.kwargs["port"] is not None:
+            port = g.kwargs["port"]
+        elif run_server:
+            port = str(helper.get_free_tcp_port())
+        else:
+            port = "4723"
 
-            g.logger.info("Finding android device")
+        g.logger.info("Finding android device")
 
-            if "device_name" in g.kwargs and g.kwargs["device_name"] is not None:
-                device_name = g.kwargs["device_name"]
-            elif "device" in g.kwargs and g.kwargs["device"] is not None:
-                device_name = g.kwargs["device"]
-            else:
-                adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb.exe")
+        if "device_name" in g.kwargs and g.kwargs["device_name"] is not None:
+            device_name = g.kwargs["device_name"]
+        elif "device" in g.kwargs and g.kwargs["device"] is not None:
+            device_name = g.kwargs["device"]
+        else:
+            if 'ANDROID_HOME' not in os.environ.keys():
+                g.logger.error("`ANDROID_HOME` environment variable not found "
+                               "(default: %USERPROFILE%\AppData\Local\Android\Sdk)")
+                raise
+            adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb")
+            ada_output = ""
+            try:
                 ada_output = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
-                device_name = re.search(r'^(.+)\tdevice', ada_output, flags=re.MULTILINE).group(1)
+            except FileNotFoundError:
+                g.logger.error("`ANDROID_HOME` environment variable not setup correctly "
+                               "(default: %USERPROFILE%\AppData\Local\Android\Sdk)")
+                raise
+            search = re.search(r'^(.+)\tdevice', ada_output, flags=re.MULTILINE)
+            if search is None:
+                g.logger.error("No Android Device Found, Either specify using `device` "
+                               "or make sure a device is available in adb")
+                raise DeviceNotFound
+            device_name = search.group(1)
 
-            if "implicit_wait" in g.kwargs and g.kwargs["implicit_wait"] is not None:
-                implicit_wait = g.kwargs["implicit_wait"]
-            else:
-                implicit_wait = 5
+        if "implicit_wait" in g.kwargs and g.kwargs["implicit_wait"] is not None:
+            implicit_wait = g.kwargs["implicit_wait"]
+        else:
+            implicit_wait = 5
 
-            # endregion
+        # endregion
 
-            if run_server:
-                def appium_logging():
-                    g.logger.info("launching appium server on {}".format(port))
-                    try:
-                        appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)),
-                                                          stdout=subprocess.PIPE, shell=True)
-                        appium_logs = logging.getLogger('appium')
-                        while g.system.status > -1:
-                            line = appium_process.stdout.readline().decode('utf-8')
-                            appium_logs.debug(line)
-                        appium_process.stdout.close()
-                        appium_process.kill()
-                    except FileNotFoundError:
-                        logging.error("Appium not installed")
+        if run_server:
+            def appium_logging():
+                global appium_process
 
-                threading.Thread(target=appium_logging).start()
+                g.logger.info("launching appium server on {}".format(port))
+                try:
+                    appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)),
+                                                      stdout=subprocess.PIPE, shell=True)
+                    appium_logs = logging.getLogger('appium')
+                    while g.system.status > -1:
+                        line = appium_process.stdout.readline().decode('utf-8')
+                        appium_logs.debug(line)
+                    appium_process.stdout.close()
+                    appium_process.kill()
+                except FileNotFoundError:
+                    g.logger.error("Appium not installed, install node package manager, "
+                                  "then use this command to install `npm install -g appium@1.15.1`")
+                    raise
 
-            g.logger.info("Connecting to appium with {}".format(device_name))
-            desired_caps = {
-                "platformName": "Android",
-                "udid": device_name,
-                "appPackage": "com.whatsapp",
-                "appActivity": "com.whatsapp.HomeActivity",
-                "noReset": "true",
-                "deviceName": "Android Emulator"
-            }
+            threading.Thread(target=appium_logging).start()
+
+        g.logger.info("Connecting to appium with {}".format(device_name))
+        desired_caps = {
+            "platformName": "Android",
+            "udid": device_name,
+            "appPackage": "com.whatsapp",
+            "appActivity": "com.whatsapp.HomeActivity",
+            "noReset": "true",
+            "deviceName": "Android Emulator"
+        }
+        driver = None
+        try:
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
-            driver.implicitly_wait(1)
-            g.logger.info("driver created")
-            return AppDriver(driver, implicit_wait)
-        except FileNotFoundError:
-            logging.error("Device not found; make sure device is connected using `adb devices` command")
+        except WebDriverException as e:
+            if "JAVA_HOME is not set currently" in e.msg:
+                g.logger.error("`JAVA_HOME` environment variable not setup correctly "
+                              "(default C:\PROGRA~1\Java\jdk1.8.0_181)")
+                appium_process.stdout.close()
+                appium_process.kill()
+                raise
+
+        driver.implicitly_wait(1)
+        g.logger.info("driver created")
+        return AppDriver(driver, implicit_wait)
 
     def destroy(self):
         """
