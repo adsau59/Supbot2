@@ -12,7 +12,7 @@ def action_callback_with_param(action_id, param2, supbot):
 def main():
     with Supbot() as supbot:
         var_from_main = "this is to show how you can send variables from other scope to callbacks"
-        supbot.send_message(contact, "hi", lambda x: action_callback_with_param(x, var_from_main, supbot))
+        supbot.send_message(contact, "hi", lambda action_id: action_callback_with_param(action_id, var_from_main, supbot))
         supbot.quit()
 
 

@@ -10,7 +10,7 @@ import re
 import shlex
 import subprocess
 import threading
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 from appium.webdriver.webelement import WebElement
 from appium.webdriver import Remote
 import time
@@ -198,25 +198,37 @@ class AppDriver:
         finally:
             self.driver.implicitly_wait(self.implicit_wait)
 
-    def get_new_messages(self) -> Optional[Tuple[str]]:
-        """
-        checks for all the new messages
-        :return: list of messages sent to the bot
-        """
-        try:
-            new_bubbles = self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
+    def get_new_bubbles(self):
+        return self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
                                                              '"com.whatsapp:id/unread_divider_tv"]/../..'
                                                              '//following-sibling::android.view.ViewGroup'
                                                              '//android.widget.LinearLayout[@resource-id='
                                                              '"com.whatsapp:id/main_layout"]')
 
-            messages: Tuple[str] = tuple(Bubble(x).get_message() for x in new_bubbles)
+    def get_new_messages(self) -> Optional[List[str]]:
+        """
+        checks for all the new messages
+        :return: list of messages sent to the bot
+        """
+        try:
+            new_bubbles = self.get_new_bubbles()
+
+            messages = [Bubble(x).get_message() for x in new_bubbles]
             return messages
         except NoSuchElementException:
             return None
 
-    def does_any_has_author(self, bubbles) -> bool:
-        ...
+    def get_group_messages(self) -> Optional[List[Tuple[str, str]]]:
+        try:
+            new_bubbles = self.get_new_bubbles()
+            messages = []
+            for i, bubble in enumerate(new_bubbles):
+                b = Bubble(bubble)
+                messages.append((b.get_author(new_bubbles), b.get_message()))
+
+            return messages
+        except NoSuchElementException:
+            return None
 
     def send_image(self, image_loc: str) -> bool:
         try:
@@ -278,6 +290,9 @@ class AppDriver:
     def check_for_below_chat(self):
         return self.check("com.whatsapp:id/badge")
 
+    def check_group(self) -> bool:
+        return self.check("com.whatsapp:id/name_in_group_tv")
+
     def check_fab(self):
         return self.check("com.whatsapp:id/fab", True)
 
@@ -299,6 +314,25 @@ class Bubble:
         except Exception:
             return ""
 
-    def get_author_from_bubble(self, bubbles) -> str:
-        ...
+    def _get_author_from_me(self) -> Optional[str]:
+        try:
+            return self.bubble.find_element_by_id("com.whatsapp:id/name_in_group_tv").text
+        except Exception:
+            return None
+
+    def get_author(self, bubbles: List[WebElement]) -> Optional[str]:
+        my_index = -1
+        for bubble_i, bubble in enumerate(bubbles):
+            if self.bubble == bubble:
+                my_index = bubble_i
+
+        checking = my_index
+        while checking >= 0:
+            author = Bubble(bubbles[checking])._get_author_from_me()
+            if author is not None:
+                return author
+            checking -= 1
+
+        return None
+
 

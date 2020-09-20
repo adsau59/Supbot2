@@ -28,6 +28,7 @@ class Supbot:
     Uses `System` to start and stop the services to make it usable
     """
     def __init__(self, message_received: Callable[[str, str], None] = None,
+                 group_message_received: Callable[[str, str, str], None] = None,
                  **kwargs):
         """
         Takes in event callbacks, initializes the `System` object
@@ -37,6 +38,7 @@ class Supbot:
         """
         g.kwargs = kwargs
         self.message_received = message_received
+        self.group_message_received = group_message_received
         self._system = System(self)
 
     @property
@@ -46,7 +48,8 @@ class Supbot:
         :return: dictionary
         """
         return {
-            Event.MESSAGE_RECEIVED: self.message_received
+            Event.MESSAGE_RECEIVED: self.message_received,
+            Event.GROUP_MESSAGE_RECEIVED: self.group_message_received
         }
 
     def __enter__(self):

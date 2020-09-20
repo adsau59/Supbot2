@@ -17,6 +17,7 @@ from supbot.statemanager.transition import goto_state
 
 class Event(Enum):
     MESSAGE_RECEIVED = 0
+    GROUP_MESSAGE_RECEIVED = 1
 
 
 # checker
@@ -56,9 +57,16 @@ def click_chat_and_read_message(current_state, chat):
     result, current = goto_state(current_state, ChatState(chat))
 
     if result == GotoStateResult.SUCCESS:
-        messages = g.driver.get_new_messages()
-        for m in messages:
-            g.system.call_event(Event.MESSAGE_RECEIVED, (chat, m))
+
+        if g.driver.check_group():
+            group_messages = g.driver.get_group_messages()
+            for m in group_messages:
+                # group name, author, message
+                g.system.call_event(Event.GROUP_MESSAGE_RECEIVED, (chat, m[0], m[1]))
+        else:
+            messages = g.driver.get_new_messages()
+            for m in messages:
+                g.system.call_event(Event.MESSAGE_RECEIVED, (chat, m))
 
     return current
 
