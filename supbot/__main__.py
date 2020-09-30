@@ -85,6 +85,17 @@ def print_message(contact, message):
     print(f"{contact}: {message}")
 
 
+def print_group_message(group, contact, message):
+    """
+    callback method for group message received event
+    :param group: name of the group message received in
+    :param contact: name of the contact
+    :param message: message string
+    :return:
+    """
+    print(f"{group}: {contact}: {message}")
+
+
 def main():
     """
     Sample application of supbot which takes in commands to run actions,
@@ -106,7 +117,7 @@ def main():
     for k, v in args.items():
         kwargs[k.strip("-").replace("-", "_")] = v
 
-    with Supbot(message_received=print_message, **kwargs) as supbot:
+    with Supbot(message_received=print_message, group_message_received=print_group_message, **kwargs) as supbot:
         start_loop(supbot, args["--no-prompt"])
 
 
