@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Event - Supbot2 Docs</title>
+        <title>Config - Supbot2 Docs</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -36,7 +36,7 @@
                             <li class="navitem">
                                 <a href="../.." class="nav-link">Home</a>
                             </li>
-                            <li class="dropdown">
+                            <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">How to Use <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -49,11 +49,11 @@
 </li>
                                     
 <li>
-    <a href="../config/" class="dropdown-item">Config</a>
+    <a href="./" class="dropdown-item active">Config</a>
 </li>
                                 </ul>
                             </li>
-                            <li class="dropdown active">
+                            <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Services <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -66,7 +66,7 @@
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active">Event</a>
+    <a href="../event/" class="dropdown-item">Event</a>
 </li>
                                 </ul>
                             </li>
@@ -82,12 +82,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../action/" class="nav-link">
+                                <a rel="prev" href="../models/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" class="nav-link disabled">
+                                <a rel="next" href="../helper/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -109,16 +109,8 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#event" class="nav-link">Event</a>
+            <li class="nav-item" data-level="1"><a href="#configuration" class="nav-link">Configuration</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#message_received" class="nav-link">message_received</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#group_message_received" class="nav-link">group_message_received</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -126,26 +118,64 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="event">Event</h1>
-<p>Run callbacks on event in whatsapp</p>
+<h1 id="configuration">Configuration</h1>
+<p>List of configuration accepted by Supbot</p>
 <hr />
-<h2 id="message_received">message_received</h2>
-<p>When a text message is received</p>
-<h4 id="callback-declaration">Callback Declaration</h4>
-<pre><code class="python">def message_received(contact_name: str, message: str):
+<p>Supbot2 can be configured using Parameters which is passed into the constructor while creating supbot object.</p>
+<h4 id="example">Example</h4>
+<pre><code class="python">with Supbot(device=&quot;abcd&quot;) as supbot:
 </code></pre>
 
-<h4 id="description">Description</h4>
-<p>When a text message is received this event is triggered. In the event, contact name of the sender is provided along with the message of sent. If there are multiple messages sent by one user, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p>
-<hr />
-<h2 id="group_message_received">group_message_received</h2>
-<p>When a group message is received</p>
-<h4 id="callback-declaration_1">Callback Declaration</h4>
-<pre><code class="python">def message_received(group_name: str, contact_name: str, message: str):
-</code></pre>
-
-<h4 id="description_1">Description</h4>
-<p>When a group text message is received this event is triggered. In the event, group name, contact name of the sender is provided along with the message of sent. If there are multiple messages sent in the group, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p></div>
+<p>over here <code>device</code> parameter is set to "abcd". Configuration can also be used when running supbot though CLI using arguments. </p>
+<p>Table given below represents the list of paramters and what it does.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>CLI Argument</th>
+<th>Description</th>
+<th>Parameter Example</th>
+<th>CLI Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>device, device_name</td>
+<td>--device, --device-name</td>
+<td>Specify the android device to use instead of searching automatically using adb</td>
+<td>Supbot(device="emulator1234")</td>
+<td>supbot --device emulator1234</td>
+</tr>
+<tr>
+<td>no_server</td>
+<td>--no-server</td>
+<td>Don't run appium server inside supbot, used when hosting appium server separately</td>
+<td>Supbot(no_server=True)</td>
+<td>supbot --no-server</td>
+</tr>
+<tr>
+<td>port</td>
+<td>--port</td>
+<td>Specify the port to host/connect appium server using, when not specified, use any random unused port, if hosting appium server inside supbot.</td>
+<td>Supbot(port=12345)</td>
+<td>supbot --port=12345</td>
+</tr>
+<tr>
+<td>check_wait</td>
+<td>--check-wait</td>
+<td>Default: 5, specify the seconds to wait for checking UI in critical situations. Use larger value for slow devices, but increasing it might degrade performance of supbot.</td>
+<td>Supbot(check_wait=10)</td>
+<td>supbot --check-wait 10</td>
+</tr>
+<tr>
+<td>-</td>
+<td>--no-prompt</td>
+<td>Don't use interactive console</td>
+<td>-</td>
+<td>supbot --no-prompt</td>
+</tr>
+</tbody>
+</table></div>
             </div>
         </div>
 

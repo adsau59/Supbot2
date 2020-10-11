@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Event - Supbot2 Docs</title>
+        <title>Models - Supbot2 Docs</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -36,7 +36,7 @@
                             <li class="navitem">
                                 <a href="../.." class="nav-link">Home</a>
                             </li>
-                            <li class="dropdown">
+                            <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">How to Use <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -45,7 +45,7 @@
 </li>
                                     
 <li>
-    <a href="../models/" class="dropdown-item">Models</a>
+    <a href="./" class="dropdown-item active">Models</a>
 </li>
                                     
 <li>
@@ -53,7 +53,7 @@
 </li>
                                 </ul>
                             </li>
-                            <li class="dropdown active">
+                            <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Services <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -66,7 +66,7 @@
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active">Event</a>
+    <a href="../event/" class="dropdown-item">Event</a>
 </li>
                                 </ul>
                             </li>
@@ -82,12 +82,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../action/" class="nav-link">
+                                <a rel="prev" href="../overview/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" class="nav-link disabled">
+                                <a rel="next" href="../config/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -109,13 +109,13 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#event" class="nav-link">Event</a>
+            <li class="nav-item" data-level="1"><a href="#models" class="nav-link">Models</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#message_received" class="nav-link">message_received</a>
+            <li class="nav-item" data-level="2"><a href="#actioncallback" class="nav-link">ActionCallback</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#group_message_received" class="nav-link">group_message_received</a>
+            <li class="nav-item" data-level="2"><a href="#action" class="nav-link">Action</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -126,26 +126,41 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="event">Event</h1>
-<p>Run callbacks on event in whatsapp</p>
+<h1 id="models">Models</h1>
+<p>Data models for the classes used in Supbot</p>
 <hr />
-<h2 id="message_received">message_received</h2>
-<p>When a text message is received</p>
-<h4 id="callback-declaration">Callback Declaration</h4>
-<pre><code class="python">def message_received(contact_name: str, message: str):
+<h2 id="actioncallback">ActionCallback</h2>
+<p>Optional callback parameter for all Action methods</p>
+<h4 id="definition">Definition</h4>
+<pre><code class="python">ActionCallback = Callable[[Action], None]
+</code></pre>
+
+<h4 id="example">Example</h4>
+<pre><code class="python">def action_callback(action: Action):
+    print(action)
 </code></pre>
 
 <h4 id="description">Description</h4>
-<p>When a text message is received this event is triggered. In the event, contact name of the sender is provided along with the message of sent. If there are multiple messages sent by one user, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p>
+<p>When passed as a parameter in Action method, it is called when action is completed. Can be used to handle cases where the Action was not able to complete successfully.</p>
 <hr />
-<h2 id="group_message_received">group_message_received</h2>
-<p>When a group message is received</p>
-<h4 id="callback-declaration_1">Callback Declaration</h4>
-<pre><code class="python">def message_received(group_name: str, contact_name: str, message: str):
+<h2 id="action">Action</h2>
+<p>Represents action to be performed</p>
+<h3 id="definition_1">Definition</h3>
+<pre><code class="python">@dataclass
+class Action:
+    action_id: str
+    action_name: ActionName
+    callback: ActionCallback
+    status: ActionStatus
+    data: Tuple
+
+    @property
+    def success(self):
+        return self.status == ActionStatus.SUCCESS
 </code></pre>
 
 <h4 id="description_1">Description</h4>
-<p>When a group text message is received this event is triggered. In the event, group name, contact name of the sender is provided along with the message of sent. If there are multiple messages sent in the group, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p></div>
+<p>Contains details on the action in supbot, maintains a unique id for each action, status represents the current state of the action. It is returned by every action method.</p></div>
             </div>
         </div>
 
