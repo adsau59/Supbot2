@@ -5,10 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        
+        <meta name="author" content="Adam Saudagar">
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Overview - Supbot2 Docs</title>
+        <title>Overview - Supbot2</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -23,7 +23,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="../..">Supbot2 Docs</a>
+                <a class="navbar-brand" href="../..">Supbot2</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -58,20 +58,17 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="../helper/" class="dropdown-item">Helper</a>
+    <a href="../../services/helper/" class="dropdown-item">Helper</a>
 </li>
                                     
 <li>
-    <a href="../action/" class="dropdown-item">Action</a>
+    <a href="../../services/action/" class="dropdown-item">Action</a>
 </li>
                                     
 <li>
-    <a href="../event/" class="dropdown-item">Event</a>
+    <a href="../../services/event/" class="dropdown-item">Event</a>
 </li>
                                 </ul>
-                            </li>
-                            <li class="navitem">
-                                <a href="https://github.com/adsau59/Supbot2" class="nav-link">GitHub</a>
                             </li>
                         </ul>
 
@@ -90,6 +87,9 @@
                                 <a rel="next" href="../models/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/adsau59/Supbot2" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
                             </li>
                     </ul>
                 </div>
@@ -139,11 +139,11 @@
 <h2 id="services">Services</h2>
 <p>There are two main sub-catagories of services that supbot provides which are, <code>Action</code>, <code>Events</code>, and <code>Helper</code>.</p>
 <h3 id="action">Action</h3>
-<p>Actions are services which allows the developer to perform operations in whatsapp, like sending a message, anything which is initiated by the developer is an Action. Check out <a href="../action/">Action</a> to learn more.</p>
+<p>Actions are services which allows the developer to perform operations in whatsapp, like sending a message, anything which is initiated by the developer is an Action. Check out <a href="../../services/action/">Action</a> to learn more.</p>
 <h3 id="event">Event</h3>
-<p>Events are services which allows the developer to run code when an event occours in whatsapp, like reciving a message. Supbot provides event listeners so that you can register your own callback methods to be executed when an event occours. Check out <a href="../event/">Event</a> to learn more.</p>
+<p>Events are services which allows the developer to run code when an event occours in whatsapp, like reciving a message. Supbot provides event listeners so that you can register your own callback methods to be executed when an event occours. Check out <a href="../../services/event/">Event</a> to learn more.</p>
 <h3 id="helper-services">Helper Services</h3>
-<p>Other than the above to main types of services, supbot also provides some helper methods. Check out <a href="../helper/">Helper</a> to learn more.</p>
+<p>Other than the above to main types of services, supbot also provides some helper methods. Check out <a href="../../services/helper/">Helper</a> to learn more.</p>
 <hr />
 <h2 id="example">Example</h2>
 <pre><code class="python">from supbot import Supbot

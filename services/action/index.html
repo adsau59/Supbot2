@@ -5,10 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        
+        <meta name="author" content="Adam Saudagar">
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>Event - Supbot2 Docs</title>
+        <title>Action - Supbot2</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -23,7 +23,7 @@
     <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="../..">Supbot2 Docs</a>
+                <a class="navbar-brand" href="../..">Supbot2</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -41,15 +41,15 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="../overview/" class="dropdown-item">Overview</a>
+    <a href="../../how-to-use/overview/" class="dropdown-item">Overview</a>
 </li>
                                     
 <li>
-    <a href="../models/" class="dropdown-item">Models</a>
+    <a href="../../how-to-use/models/" class="dropdown-item">Models</a>
 </li>
                                     
 <li>
-    <a href="../config/" class="dropdown-item">Config</a>
+    <a href="../../how-to-use/config/" class="dropdown-item">Config</a>
 </li>
                                 </ul>
                             </li>
@@ -62,16 +62,13 @@
 </li>
                                     
 <li>
-    <a href="../action/" class="dropdown-item">Action</a>
+    <a href="./" class="dropdown-item active">Action</a>
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active">Event</a>
+    <a href="../event/" class="dropdown-item">Event</a>
 </li>
                                 </ul>
-                            </li>
-                            <li class="navitem">
-                                <a href="https://github.com/adsau59/Supbot2" class="nav-link">GitHub</a>
                             </li>
                         </ul>
 
@@ -82,14 +79,17 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../action/" class="nav-link">
+                                <a rel="prev" href="../helper/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" class="nav-link disabled">
+                                <a rel="next" href="../event/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/adsau59/Supbot2" class="nav-link"><i class="fa fa-github"></i> GitHub</a>
                             </li>
                     </ul>
                 </div>
@@ -109,13 +109,9 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#event" class="nav-link">Event</a>
+            <li class="nav-item" data-level="1"><a href="#action" class="nav-link">Action</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#message_received" class="nav-link">message_received</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#group_message_received" class="nav-link">group_message_received</a>
+            <li class="nav-item" data-level="2"><a href="#send_message" class="nav-link">send_message</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -126,26 +122,17 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="event">Event</h1>
-<p>Run callbacks on event in whatsapp</p>
+<h1 id="action">Action</h1>
+<p>Perform operations in whatsapp</p>
 <hr />
-<h2 id="message_received">message_received</h2>
-<p>When a text message is received</p>
-<h4 id="callback-declaration">Callback Declaration</h4>
-<pre><code class="python">def message_received(contact_name: str, message: str):
+<h2 id="send_message">send_message</h2>
+<p>Send message to a target contact</p>
+<h4 id="declaration">Declaration</h4>
+<pre><code class="python">def send_message(self, contact_name: str, message: str, callback: Optional[ActionCallback] = None) -&gt; Action:
 </code></pre>
 
 <h4 id="description">Description</h4>
-<p>When a text message is received this event is triggered. In the event, contact name of the sender is provided along with the message of sent. If there are multiple messages sent by one user, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p>
-<hr />
-<h2 id="group_message_received">group_message_received</h2>
-<p>When a group message is received</p>
-<h4 id="callback-declaration_1">Callback Declaration</h4>
-<pre><code class="python">def message_received(group_name: str, contact_name: str, message: str):
-</code></pre>
-
-<h4 id="description_1">Description</h4>
-<p>When a group text message is received this event is triggered. In the event, group name, contact name of the sender is provided along with the message of sent. If there are multiple messages sent in the group, each of those messages will get their own event trigger, so callback will be executed for each one of those messages.</p></div>
+<p>Sends a message to the target contact on whatsapp. <code>contact_name</code> represents the name of the target contact if it is saved by a name. If not then phone number should be used, in the exact format shown in whatsapp. Currently supbot doesn't differentiate between groups and personal chat, so you can also use this method to send messages in group too.</p></div>
             </div>
         </div>
 
