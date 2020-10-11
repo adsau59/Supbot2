@@ -8,12 +8,10 @@ Perform operations in whatsapp
 
 Send message to a target contact
 
-<br/>
-
 #### Declaration
 
 ```python
-def send_message(self, contact_name: str, message: str):
+def send_message(self, contact_name: str, message: str, callback: Optional[ActionCallback] = None) -> Action:
 ```
 
 #### Description

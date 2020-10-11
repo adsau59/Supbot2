@@ -4,8 +4,12 @@ nav:
     - Home: index.md
     - How to Use:
         - Overview: how-to-use/overview.md
+        - Models: how-to-use/models.md
+        - Config: how-to-use/config.md
+    - Services:
         - Helper: how-to-use/helper.md
         - Action: how-to-use/action.md
         - Event: how-to-use/event.md
+    - GitHub: https://github.com/adsau59/Supbot2
         
 copyright: Copyright &copy; 2020 <a href="https://twitter.com/adam_saudagar">Adam Saudagar</a>

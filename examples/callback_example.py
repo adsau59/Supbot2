@@ -1,13 +1,13 @@
 from supbot import Supbot
+from supbot.action import Action
 
 contact = "123456789"
 
 
-def action_callback_with_param(action_id):
-    action = supbot.get_action(action_id)
+def action_callback(action: Action):
     print(action)
 
 
 with Supbot() as supbot:
-    supbot.send_message(contact, "hi", action_callback_with_param)
+    supbot.send_message(contact, "hi", action_callback)
     supbot.quit()

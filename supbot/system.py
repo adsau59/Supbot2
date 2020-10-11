@@ -62,6 +62,7 @@ class System:
 
         self.status = 1
         self._action_buffer: ActionBuffer = {}
+        # todo remove action archive (no need of it)
         self.action_achieve: ActionBuffer = {}
         self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot

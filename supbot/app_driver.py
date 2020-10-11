@@ -19,7 +19,10 @@ from supbot import g, helper
 # noinspection PyBroadException
 from supbot.exceptions import DeviceNotFound
 
+appium_process = None
 
+
+# noinspection PyBroadException
 class AppDriver:
     """
     Abstracts appium calls
@@ -57,7 +60,6 @@ class AppDriver:
                                "(default: %USERPROFILE%\AppData\Local\Android\Sdk)")
                 raise
             adb_path = os.path.join(os.environ.get('ANDROID_HOME'), 'platform-tools', "adb")
-            ada_output = ""
             try:
                 ada_output = subprocess.check_output([adb_path, "devices"]).decode('utf-8')
             except FileNotFoundError:
@@ -71,8 +73,8 @@ class AppDriver:
                 raise DeviceNotFound
             device_name = search.group(1)
 
-        if "implicit_wait" in g.kwargs and g.kwargs["implicit_wait"] is not None:
-            implicit_wait = g.kwargs["implicit_wait"]
+        if "check_wait" in g.kwargs and g.kwargs["check_wait"] is not None:
+            implicit_wait = g.kwargs["check_wait"]
         else:
             implicit_wait = 5
 
@@ -94,7 +96,7 @@ class AppDriver:
                     appium_process.kill()
                 except FileNotFoundError:
                     g.logger.error("Appium not installed, install node package manager, "
-                                  "then use this command to install `npm install -g appium@1.15.1`")
+                                   "then use this command to install `npm install -g appium@1.15.1`")
                     raise
 
             threading.Thread(target=appium_logging).start()
@@ -114,7 +116,7 @@ class AppDriver:
         except WebDriverException as e:
             if "JAVA_HOME is not set currently" in e.msg:
                 g.logger.error("`JAVA_HOME` environment variable not setup correctly "
-                              "(default C:\PROGRA~1\Java\jdk1.8.0_181)")
+                               "(default C:\PROGRA~1\Java\jdk1.8.0_181)")
                 appium_process.stdout.close()
                 appium_process.kill()
                 raise
@@ -228,10 +230,10 @@ class AppDriver:
 
     def get_new_bubbles(self):
         return self.driver.find_elements_by_xpath('//android.widget.TextView[@resource-id='
-                                                             '"com.whatsapp:id/unread_divider_tv"]/../..'
-                                                             '//following-sibling::android.view.ViewGroup'
-                                                             '//android.widget.LinearLayout[@resource-id='
-                                                             '"com.whatsapp:id/main_layout"]')
+                                                  '"com.whatsapp:id/unread_divider_tv"]/../..'
+                                                  '//following-sibling::android.view.ViewGroup'
+                                                  '//android.widget.LinearLayout[@resource-id='
+                                                  '"com.whatsapp:id/main_layout"]')
 
     def get_new_messages(self) -> Optional[List[str]]:
         """
@@ -328,7 +330,15 @@ class AppDriver:
         return self.check("com.whatsapp:id/search_src_text", True)
 
     def check_chat(self, chat_name):
-        return self.check("com.whatsapp:id/conversation_contact_name", True)
+        try:
+            self.driver.implicitly_wait(self.implicit_wait)
+
+            name = self.driver.find_element_by_id("com.whatsapp:id/conversation_contact_name").text
+            return helper.contact_number_equal(name, chat_name)
+        except Exception:
+            return False
+        finally:
+            self.driver.implicitly_wait(1)
 
 
 # noinspection PyBroadException
@@ -362,5 +372,3 @@ class Bubble:
             checking -= 1
 
         return None
-
-

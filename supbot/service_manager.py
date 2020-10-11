@@ -88,7 +88,7 @@ def execute_action(current: GUIState) -> GUIState:
     action.status = ActionStatus.SUCCESS if success else ActionStatus.UNSUCCESS
 
     if action.callback:
-        action.callback(action_id)
+        action.callback(action)
 
     return current
 

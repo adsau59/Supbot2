@@ -12,8 +12,6 @@ from supbot.results import GotoStateResult, ActionStatus
 from supbot.statemanager.state import GUIState, ChatState, State
 from supbot.statemanager.transition import goto_state
 
-ActionCallback = Callable[[str], None]
-
 
 class ActionName(Enum):
     SEND_MESSAGE = 0
@@ -23,13 +21,19 @@ class ActionName(Enum):
 class Action:
     action_id: str
     action_name: ActionName
-    callback: ActionCallback
+    callback: 'ActionCallback'
     status: ActionStatus
     data: Tuple
+
+    def __repr__(self):
+        return f"{self.action_name}: {self.data}: {self.status}"
 
     @property
     def success(self):
         return self.status == ActionStatus.SUCCESS
+
+
+ActionCallback = Callable[[Action], None]
 
 
 def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
