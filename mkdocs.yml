@@ -1,4 +1,8 @@
-site_name: Supbot2 Docs
+site_name: Supbot2
+site_description: Unoffical WhatsApp Automation Library for Python.
+repo_url: https://github.com/adsau59/Supbot2
+site_author: Adam Saudagar
+edit_uri: ""
 
 nav:
     - Home: index.md
@@ -7,9 +11,8 @@ nav:
         - Models: how-to-use/models.md
         - Config: how-to-use/config.md
     - Services:
-        - Helper: how-to-use/helper.md
-        - Action: how-to-use/action.md
-        - Event: how-to-use/event.md
-    - GitHub: https://github.com/adsau59/Supbot2
+        - Helper: services/helper.md
+        - Action: services/action.md
+        - Event: services/event.md
         
 copyright: Copyright &copy; 2020 <a href="https://twitter.com/adam_saudagar">Adam Saudagar</a>

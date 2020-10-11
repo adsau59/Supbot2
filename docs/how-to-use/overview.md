@@ -21,15 +21,15 @@ There are two main sub-catagories of services that supbot provides which are, `A
 
 ### Action
 
-Actions are services which allows the developer to perform operations in whatsapp, like sending a message, anything which is initiated by the developer is an Action. Check out [Action](action.md) to learn more.
+Actions are services which allows the developer to perform operations in whatsapp, like sending a message, anything which is initiated by the developer is an Action. Check out [Action](../services/action.md) to learn more.
 
 ### Event
 
-Events are services which allows the developer to run code when an event occours in whatsapp, like reciving a message. Supbot provides event listeners so that you can register your own callback methods to be executed when an event occours. Check out [Event](event.md) to learn more.
+Events are services which allows the developer to run code when an event occours in whatsapp, like reciving a message. Supbot provides event listeners so that you can register your own callback methods to be executed when an event occours. Check out [Event](../services/event.md) to learn more.
 
 ### Helper Services
 
-Other than the above to main types of services, supbot also provides some helper methods. Check out [Helper](helper.md) to learn more.
+Other than the above to main types of services, supbot also provides some helper methods. Check out [Helper](../services/helper.md) to learn more.
 
 ---
 
