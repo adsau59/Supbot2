@@ -110,16 +110,19 @@ class AppDriver:
             "noReset": "true",
             "deviceName": "Android Emulator"
         }
-        driver = None
         try:
             driver = Remote('http://localhost:{}/wd/hub'.format(port), desired_caps)
         except WebDriverException as e:
             if "JAVA_HOME is not set currently" in e.msg:
                 g.logger.error("`JAVA_HOME` environment variable not setup correctly "
                                "(default C:\PROGRA~1\Java\jdk1.8.0_181)")
-                appium_process.stdout.close()
-                appium_process.kill()
-                raise
+            else:
+                g.logger.error("Appium server could not be started because of unknown exception, please refer "
+                               "'appium.log' file to troubleshoot. Alternatively you can run appium server as a "
+                               "standalone and use `no_server` parameter. Refer Supbot2 docs for more info.")
+            appium_process.stdout.close()
+            appium_process.kill()
+            raise
 
         driver.implicitly_wait(1)
         g.logger.info("driver created")
