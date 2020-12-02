@@ -10,11 +10,16 @@ import re
 import shlex
 import subprocess
 import threading
+import traceback
 from typing import Tuple, Optional, List
+
+from appium.webdriver.extensions.keyboard import Keyboard
 from appium.webdriver.webelement import WebElement
 from appium.webdriver import Remote
 import time
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
+from selenium.webdriver import ActionChains
+
 from supbot import g, helper
 # noinspection PyBroadException
 from supbot.exceptions import DeviceNotFound
@@ -164,14 +169,30 @@ class AppDriver:
     def goto_home(self):
         self.driver.start_activity("com.whatsapp", "com.whatsapp.HomeActivity")
 
-    def type_and_send(self, message: str):
+    def type_and_send(self, message: str, mentions: bool):
         """
         Entered text in chat, and presses the send button
-        :param message: message to send
+        :param mentions:
+        :param message:
         """
         try:
             element = self.driver.find_element_by_id('com.whatsapp:id/entry')
-            element.send_keys(message)
+
+            if mentions:
+                # break the message into parts depending on mentions
+                parts = re.split(r"(^|\s)(@[A-Za-z0-9]+)", message)
+
+                for p in parts:
+                    # then try to press it after each mention string
+
+                    actions = ActionChains(self.driver)
+                    actions.send_keys_to_element(element, p)
+                    actions.perform()
+
+                    if re.match(r"(@[A-Za-z0-9]+)", p):
+                        self.press_mention()
+            else:
+                element.send_keys(message)
 
             element = self.driver.find_element_by_id('com.whatsapp:id/send')
             element.click()
@@ -209,6 +230,13 @@ class AppDriver:
     def press_search_back(self):
         try:
             self.driver.find_element_by_id("com.whatsapp:id/search_back").click()
+            return True
+        except Exception:
+            return False
+
+    def press_mention(self):
+        try:
+            self.driver.find_element_by_id("com.whatsapp:id/mention_attach").click()
             return True
         except Exception:
             return False

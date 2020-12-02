@@ -97,12 +97,13 @@ class Supbot:
             time.sleep(.1)
         return action.status == ActionStatus.SUCCESS
 
-    def send_message(self, contact_name: str, message: str,
+    def send_message(self, contact_name: str, message: str, mentions: bool = False,
                      action_complete_callback: Optional[ActionCallback] = None) -> Action:
         """
         Send Message action
         sends message to the contact
 
+        :param mentions: use mentions (tagging) when @ is used in front of contact/number
         :param action_complete_callback:
         :param contact_name: name of the contact to send message
         :param message: message to send
@@ -110,7 +111,7 @@ class Supbot:
         # todo move this into system
         action_id = str(uuid.uuid4())
         action = Action(action_id, ActionName.SEND_MESSAGE, action_complete_callback, ActionStatus.WAITING,
-                        (contact_name, message))
+                        (contact_name, message, mentions))
         self._system.action_buffer[action_id] = action
         self._system.action_achieve[action_id] = action
         return action

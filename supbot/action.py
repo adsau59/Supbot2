@@ -44,11 +44,11 @@ def send_message(current: GUIState, data: Tuple) -> Tuple[bool, GUIState]:
     :param data: Data required to execute the service
     :return: resultant gui state after executing the action
     """
-    chat_name, message = data
+    chat_name, message, mentions = data
 
     result, current = goto_state(current, ChatState(chat_name))
 
-    if result == GotoStateResult.SUCCESS and current.state == State.CHAT and g.driver.type_and_send(message):
+    if result == GotoStateResult.SUCCESS and current.state == State.CHAT and g.driver.type_and_send(message, mentions):
         return True, current
     else:
         g.logger.warning("Failed to send message to {}".format(chat_name))
