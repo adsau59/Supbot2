@@ -9,5 +9,5 @@ def action_callback(action: Action):
 
 
 with Supbot() as supbot:
-    supbot.send_message(contact, "hi", action_callback)
+    supbot.send_message(contact, "hi", action_complete_callback=action_callback)
     supbot.quit()
