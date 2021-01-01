@@ -113,5 +113,4 @@ class Supbot:
         action = Action(action_id, ActionName.SEND_MESSAGE, action_complete_callback, ActionStatus.WAITING,
                         (contact_name, message, mentions))
         self._system.action_buffer[action_id] = action
-        self._system.action_achieve[action_id] = action
         return action

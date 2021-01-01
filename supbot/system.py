@@ -60,10 +60,16 @@ class System:
         fh = logging.FileHandler('appium.log', encoding='utf-8')
         appium_logs.addHandler(fh)
 
+        """
+        1: not started
+        2: looper started
+        0: quit requested
+        -1: looper finished
+        -2: appium finished
+        """
         self.status = 1
+
         self._action_buffer: ActionBuffer = {}
-        # todo remove action archive (no need of it)
-        self.action_achieve: ActionBuffer = {}
         self._looper_thread = threading.Thread(target=looper.start)
         self._supbot = supbot
         g.system = self
@@ -92,6 +98,8 @@ class System:
         looper thread finishes when,  `_status` flag is False and there are no actions left in `_action_buffer`
         """
         self._looper_thread.join()
+        if g.driver.appium_thread is not None:
+            g.driver.appium_thread.join()
 
     def quit(self):
         """

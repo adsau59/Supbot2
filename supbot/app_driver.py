@@ -24,22 +24,23 @@ from supbot import g, helper
 # noinspection PyBroadException
 from supbot.exceptions import DeviceNotFound
 
-appium_process = None
-
 
 # noinspection PyBroadException
+from supbot.helper import kill_thread
+
+
 class AppDriver:
     """
     Abstracts appium calls
     """
 
-    def __init__(self, driver: Remote, implicit_wait: int):
+    def __init__(self, driver: Remote, implicit_wait: int, appium_thread: Optional[threading.Thread]):
         self.driver = driver
         self.implicit_wait = implicit_wait
+        self.appium_thread = appium_thread
 
     @staticmethod
     def create() -> Optional['AppDriver']:
-        global appium_process
         """
         Initializes appium driver
         """
@@ -85,26 +86,28 @@ class AppDriver:
 
         # endregion
 
+        appium_thread = None
         if run_server:
             def appium_logging():
-                global appium_process
-
                 g.logger.info("launching appium server on {}".format(port))
                 try:
-                    appium_process = subprocess.Popen(shlex.split("appium --port {}".format(port)),
-                                                      stdout=subprocess.PIPE, shell=True)
+                    g.appium_process = subprocess.Popen(shlex.split(f"appium --port {port}"),
+                                                        stdout=subprocess.PIPE, shell=True)
                     appium_logs = logging.getLogger('appium')
                     while g.system.status > -1:
-                        line = appium_process.stdout.readline().decode('utf-8')
+                        line = g.appium_process.stdout.readline().decode('utf-8')
                         appium_logs.debug(line)
-                    appium_process.stdout.close()
-                    appium_process.kill()
+                    g.appium_process.stdout.close()
+                    g.appium_process.kill()
+                    g.system.status = -2
+                    g.logger.info("appium server closed")
                 except FileNotFoundError:
                     g.logger.error("Appium not installed, install node package manager, "
                                    "then use this command to install `npm install -g appium@1.15.1`")
                     raise
 
-            threading.Thread(target=appium_logging).start()
+            appium_thread = threading.Thread(target=appium_logging)
+            appium_thread.start()
 
         g.logger.info("Connecting to appium with {}".format(device_name))
         desired_caps = {
@@ -125,13 +128,20 @@ class AppDriver:
                 g.logger.error("Appium server could not be started because of unknown exception, please refer "
                                "'appium.log' file to troubleshoot. Alternatively you can run appium server as a "
                                "standalone and use `no_server` parameter. Refer Supbot2 docs for more info.")
-            appium_process.stdout.close()
-            appium_process.kill()
+            g.appium_process.stdout.close()
+            g.appium_process.kill()
             raise
 
         driver.implicitly_wait(1)
         g.logger.info("driver created")
-        return AppDriver(driver, implicit_wait)
+        return AppDriver(driver, implicit_wait, appium_thread)
+
+    def timeout_appium(self):
+        if g.system.status != -2:
+            time.sleep(5)
+            if g.system.status != -2:
+                kill_thread(self.appium_thread)
+                g.logger.info("appium server killed")
 
     def destroy(self):
         """

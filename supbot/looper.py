@@ -3,6 +3,10 @@ looper.py
 
 provides a function which is initializes and maintains state of supbot
 """
+import ctypes
+import signal
+import sys
+import threading
 
 from supbot import service_manager, g
 from supbot.statemanager.state import main_state
@@ -44,3 +48,5 @@ def start():
 
     g.driver.destroy()
     g.system.status = -1
+    g.logger.info("supbot server closed")
+    g.driver.timeout_appium()
