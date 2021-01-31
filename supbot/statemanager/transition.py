@@ -133,7 +133,7 @@ def _goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateRes
         # if not found, then use temp group search method if it is a phone number
         elif result == GotoStateResult.ELEMENT_NOT_FOUND:
             contact = cast(ChatState, chat).contact
-            if not re.search("\d{11,13}", contact):
+            if not re.search(r"\d{8,13}", contact):
                 return result, new_current
 
             result, new_current = _step_to_state(new_current, temp_group)

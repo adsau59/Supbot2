@@ -41,8 +41,9 @@ You can either watch the installation guide, or follow the steps below
 ### Configuring Whatsapp
 - Install Whatsapp on your phone/AVD
 - Set it up with your phone number
-- **IMPORTANT:** Turn on notification from android settings
+- **IMPORTANT:** Turn off notification from android settings
 - **IMPORTANT:** Create an empty group with `!temp` name  and pin it to the top (You can do this by adding 1 contact to the group then kicking them out)
+- **IMPORTANT:** Change keyboard to Appium Keyboard (if its not available run supbot once, required for using mentions)
 
 ### Creating Environment
 You will need to setup Appium and Whatsapp before you start with Supbot
