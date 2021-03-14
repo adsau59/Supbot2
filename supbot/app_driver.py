@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import threading
 import traceback
+from functools import wraps
 from typing import Tuple, Optional, List
 
 from appium.webdriver.extensions.keyboard import Keyboard
@@ -24,20 +25,32 @@ from supbot import g, helper
 # noinspection PyBroadException
 from supbot.exceptions import DeviceNotFound
 
-
 # noinspection PyBroadException
 from supbot.helper import kill_thread
 
 
+def check_delay(f):
+    @wraps(f)
+    def decorated_function(self, *args, **kwargs):
+        self.driver.implicitly_wait(self.implicit_wait)
+        result = f(self, *args, **kwargs)
+        self.driver.implicitly_wait(1)
+        return result
+
+    return decorated_function
+
+
+# noinspection PyBroadException
 class AppDriver:
     """
     Abstracts appium calls
     """
 
-    def __init__(self, driver: Remote, implicit_wait: int, appium_thread: Optional[threading.Thread]):
+    def __init__(self, driver: Remote, implicit_wait: int, appium_thread: Optional[threading.Thread], info: dict):
         self.driver = driver
         self.implicit_wait = implicit_wait
         self.appium_thread = appium_thread
+        self.info = info
 
     @staticmethod
     def create() -> Optional['AppDriver']:
@@ -45,6 +58,7 @@ class AppDriver:
         Initializes appium driver
         """
         # region input from kwargs
+        # todo fix repetition of kwarg code
         run_server = not ("no_server" in g.kwargs and g.kwargs["no_server"])
 
         if "port" in g.kwargs and g.kwargs["port"] is not None:
@@ -54,7 +68,7 @@ class AppDriver:
         else:
             port = "4723"
 
-        g.logger.info("Finding android device")
+        g.logger.debug("Finding android device")
 
         if "device_name" in g.kwargs and g.kwargs["device_name"] is not None:
             device_name = g.kwargs["device_name"]
@@ -89,7 +103,7 @@ class AppDriver:
         appium_thread = None
         if run_server:
             def appium_logging():
-                g.logger.info("launching appium server on {}".format(port))
+                g.logger.debug("launching appium server on {}".format(port))
                 try:
                     g.appium_process = subprocess.Popen(shlex.split(f"appium --port {port}"),
                                                         stdout=subprocess.PIPE, shell=True)
@@ -100,7 +114,7 @@ class AppDriver:
                     g.appium_process.stdout.close()
                     g.appium_process.kill()
                     g.system.status = -2
-                    g.logger.info("appium server closed")
+                    g.logger.debug("appium server closed")
                 except FileNotFoundError:
                     g.logger.error("Appium not installed, install node package manager, "
                                    "then use this command to install `npm install -g appium@1.15.1`")
@@ -109,7 +123,7 @@ class AppDriver:
             appium_thread = threading.Thread(target=appium_logging)
             appium_thread.start()
 
-        g.logger.info("Connecting to appium with {}".format(device_name))
+        g.logger.debug("Connecting to appium with {}".format(device_name))
         desired_caps = {
             "platformName": "Android",
             "udid": device_name,
@@ -133,8 +147,8 @@ class AppDriver:
             raise
 
         driver.implicitly_wait(1)
-        g.logger.info("driver created")
-        return AppDriver(driver, implicit_wait, appium_thread)
+        g.logger.debug("driver created")
+        return AppDriver(driver, implicit_wait, appium_thread, {"port": port, "device": device_name})
 
     def timeout_appium(self):
         if g.system.status != -2:
@@ -149,25 +163,45 @@ class AppDriver:
         """
         self.driver.quit()
 
-    def click_on_chat(self, chat_name: str) -> bool:
+    def click_on_chat(self, chat_name: str, search:bool=False) -> bool:
         """
         Clicks on the chat list item in the app
+        :param search: set true if on search screen
         :param chat_name: name of the contact
         """
         try:
-            search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+            if not search:
+                search = self.driver.find_elements_by_id("com.whatsapp:id/conversations_row_contact_name")
+            else:
+                search = self.driver.find_element_by_id("com.whatsapp:id/result_list").find_elements_by_id(
+                    "com.whatsapp:id/conversations_row_contact_name")
             element = next(x for x in search if helper.contact_number_equal(x.text, chat_name))
             element.click()
             return True
         except Exception:
             return False
 
-    def type_in_search(self, chat_name: str) -> bool:
+    def get_search_text(self):
         try:
-            self.driver.find_element_by_id("com.whatsapp:id/search_src_text").send_keys(chat_name)
-            return True
+            element = self.driver.find_element_by_id("com.whatsapp:id/search_input")
         except NoSuchElementException:
+            try:
+                # backwards compatibility
+                g.logger.warning("Please update whatsapp version, older version might be a bit slow")
+                element = self.driver.find_element_by_id("com.whatsapp:id/search_src_text")
+            except NoSuchElementException:
+                return None
+
+        return element
+
+    def type_in_search(self, chat_name: str) -> bool:
+        element = self.get_search_text()
+
+        if element is None:
             return False
+
+        element.send_keys(chat_name)
+        return True
 
     def click_search(self) -> bool:
         try:
@@ -239,7 +273,8 @@ class AppDriver:
 
     def press_search_back(self):
         try:
-            self.driver.find_element_by_id("com.whatsapp:id/search_back").click()
+            self.driver.find_element_by_xpath("//android.widget.ImageView[@content-desc='Back'] or "
+                                              "//android.widget.ImageButton[@content-des='Close']").click()
             return True
         except Exception:
             return False
@@ -327,10 +362,16 @@ class AppDriver:
         except Exception:
             return False
 
-    def check(self, _id, slow: bool = False):
+    # region checkers
+    # todo make better architecture for check
+
+    # todo divide this method into 2 decorators, 1 enables slow check (which u already did), other does the check
+    #  logic in try except region helper 
+    def check(self, query, slow: bool = False, xpath: bool = False):
         """
         checks if an element is on screen
-        :param _id: id of the element
+        :param xpath:
+        :param query: id of the element
         :param slow: set to true if used for state.check methods
         :return: True if element exists
         """
@@ -338,14 +379,17 @@ class AppDriver:
             if slow:
                 self.driver.implicitly_wait(self.implicit_wait)
 
-            return self.driver.find_element_by_id(_id) is not None
+            element = self.driver.find_element_by_id(query) if not xpath else self.driver.find_element_by_xpath(query)
+            return element is not None
         except Exception:
             return False
         finally:
             if slow:
                 self.driver.implicitly_wait(1)
 
-    # todo make better architecture for check
+    # endregion
+
+    # region fast checker/ action checkers
     def check_scroll_end(self):
         return self.check("com.whatsapp:id/conversations_row_tip_tv")
 
@@ -364,22 +408,26 @@ class AppDriver:
     def check_group(self) -> bool:
         return self.check("com.whatsapp:id/name_in_group_tv")
 
+    # endregion
+
+    # region slow checkers/ state checkers
     def check_fab(self):
         return self.check("com.whatsapp:id/fab", True)
 
+    @check_delay
     def check_search_input(self):
-        return self.check("com.whatsapp:id/search_src_text", True)
+        return self.get_search_text() is not None
 
+    @check_delay
     def check_chat(self, chat_name):
         try:
-            self.driver.implicitly_wait(self.implicit_wait)
-
             name = self.driver.find_element_by_id("com.whatsapp:id/conversation_contact_name").text
             return helper.contact_number_equal(name, chat_name)
         except Exception:
             return False
-        finally:
-            self.driver.implicitly_wait(1)
+    # endregion
+
+    # endregion
 
 
 # noinspection PyBroadException

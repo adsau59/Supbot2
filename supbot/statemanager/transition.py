@@ -20,6 +20,7 @@ def goto_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, GUIS
     :param _to: target state
     :return: (result, current_state)
     """
+    g.logger.debug(f"going from state {_current.state} to {_to.state}")
     result, new_current = _step_to_state(_current, _to)
 
     if result == GotoStateResult.CHECK_FAILED:
@@ -59,16 +60,21 @@ def _step_to_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, 
 
     # initial check if the starting state is correct
     if not _current.check():
+        g.logger.debug(f"{_current.state} state check failed")
         _check_failed()
         return GotoStateResult.CHECK_FAILED, main_state
 
     # try to go to the target state
+    g.logger.debug(f"Trying to step towards next state")
     result, new_current = _current.to(_to)
 
     # The step was successful,
     if result == GotoStateResult.SUCCESS:
+        g.logger.debug(f"step was successful")
+
         # if the target state has been reached, return the function
         if new_current.state == _to.state:
+            g.logger.debug(f"reached target state")
 
             # if the target is not chat, target state as been reached
             if new_current.state != State.CHAT:
@@ -84,21 +90,24 @@ def _step_to_state(_current: GUIState, _to: GUIState) -> Tuple[GotoStateResult, 
         else:
             # if the target state is not reached, (even though the step was successful)
             # that means a step towards the target was taken
+            g.logger.debug(f"reached intermediary state")
             return _step_to_state(new_current, _to)
 
     # The step was unsuccessful
     elif result == GotoStateResult.ELEMENT_NOT_FOUND:
+        g.logger.debug(f"step was unsuccessful with result {result}")
 
         # try to use fallbacks for chat state
         if _to.state == State.CHAT:
+            g.logger.debug(f"trying fallbacks for chat target state")
             return _goto_chat_fallback(new_current, _to)
 
         # else just return fail
-        else:
-            return GotoStateResult.ELEMENT_NOT_FOUND, _current
+        return result, _current
 
     # if the check failed, reset the ui and give a warning
     if result == GotoStateResult.CHECK_FAILED:
+        g.logger.debug(f"step was unsuccessful with result {result}")
         _check_failed()
         return result, main_state
 
@@ -119,6 +128,7 @@ def _goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateRes
     chat: ChatState = cast(ChatState, _to)
 
     # goto search state (to search the chat)
+    g.logger.debug("trying to search for chat")
     result, new_current = _step_to_state(_current, search_state)
 
     if result == GotoStateResult.SUCCESS:
@@ -128,17 +138,22 @@ def _goto_chat_fallback(_current: GUIState, _to: GUIState) -> Tuple[GotoStateRes
 
         # if chat found then good enough
         if result == GotoStateResult.SUCCESS:
+            g.logger.debug("chat found by search")
             return result, new_current
 
         # if not found, then use temp group search method if it is a phone number
         elif result == GotoStateResult.ELEMENT_NOT_FOUND:
+            g.logger.debug("couldn't find chat by search, checking if its a phone number")
             contact = cast(ChatState, chat).contact
             if not re.search(r"\d{8,13}", contact):
+                g.logger.debug("not a phone number, returning fail")
                 return result, new_current
 
+            g.logger.debug("going to temp group")
             result, new_current = _step_to_state(new_current, temp_group)
 
             if result == GotoStateResult.SUCCESS:
+                g.logger.debug("writing wa.me link")
                 if g.driver.type_and_send(f"wa.me/{contact}", False) and g.driver.click_on_last_chat_link():
                     if not g.driver.click_ok():
                         return GotoStateResult.SUCCESS, chat

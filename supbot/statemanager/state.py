@@ -103,7 +103,7 @@ class SearchState(GUIState):
 
         elif target.state == State.CHAT:
             chat_name = cast(ChatState, target).contact
-            if g.driver.type_in_search(chat_name) and g.driver.click_on_chat(chat_name):
+            if g.driver.type_in_search(chat_name) and g.driver.click_on_chat(chat_name, True):
                 return GotoStateResult.SUCCESS, target
             else:
                 return GotoStateResult.ELEMENT_NOT_FOUND, self

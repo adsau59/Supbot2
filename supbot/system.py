@@ -42,11 +42,13 @@ class System:
                 msg = self.format(record)
                 print(msg)
 
+        self.verbose = "verbose" in g.kwargs and g.kwargs["verbose"] is not None
+
         logging.getLogger("selenium").setLevel(logging.ERROR)
         logging.getLogger("urllib3").setLevel(logging.ERROR)
         logging.getLogger("appium").setLevel(logging.DEBUG)
 
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG if self.verbose else logging.INFO)
 
         logging.getLogger().handlers = []
 
@@ -56,9 +58,10 @@ class System:
         handler.setFormatter(logging.Formatter(fmt=log_format))
         g.logger.addHandler(handler)
 
-        appium_logs = logging.getLogger('appium')
-        fh = logging.FileHandler('appium.log', encoding='utf-8')
-        appium_logs.addHandler(fh)
+        if self.verbose:
+            appium_logs = logging.getLogger('appium')
+            fh = logging.FileHandler('appium.log', encoding='utf-8')
+            appium_logs.addHandler(fh)
 
         """
         1: not started

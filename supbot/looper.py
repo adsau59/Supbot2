@@ -33,7 +33,7 @@ def start():
 
     gui_state = main_state
 
-    g.logger.info("Started")
+    g.logger.info(f"Started on port {g.driver.info['port']} with device {g.driver.info['device']}")
     g.system.status = 2
 
     while g.system.is_on() or len(g.system.action_buffer.items()) > 0:
@@ -48,5 +48,5 @@ def start():
 
     g.driver.destroy()
     g.system.status = -1
-    g.logger.info("supbot server closed")
+    g.logger.debug("supbot server closed")
     g.driver.timeout_appium()
