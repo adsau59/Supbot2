@@ -142,8 +142,10 @@ class AppDriver:
                 g.logger.error("Appium server could not be started because of unknown exception, please refer "
                                "'appium.log' file to troubleshoot. Alternatively you can run appium server as a "
                                "standalone and use `no_server` parameter. Refer Supbot2 docs for more info.")
-            g.appium_process.stdout.close()
-            g.appium_process.kill()
+
+            if not g.appium_process:
+                g.appium_process.stdout.close()
+                g.appium_process.kill()
             raise
 
         driver.implicitly_wait(1)
