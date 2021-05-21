@@ -75,8 +75,15 @@ class MainState(GUIState):
             return GotoStateResult.SUCCESS, target
 
         elif target.state == State.SEARCH:
+            if self.scrolling:
+                self.scroll_to_top()
+
             if g.driver.click_search():
                 return GotoStateResult.SUCCESS, target
+            else:
+                # can't find the search for some reason,
+                # lost tracking of the ui, need to restart
+                return GotoStateResult.CHECK_FAILED, self
 
         elif target.state == State.CHAT:
             if g.driver.click_on_chat(cast(ChatState, target).contact):
